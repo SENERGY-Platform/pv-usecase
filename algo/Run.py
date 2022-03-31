@@ -19,7 +19,7 @@ def init_algo():             # This function initializes all global variables of
 
     history_power = []       # This list will contain the power values from the last 1/2/4 weeks.
 
-    policy = Agent.Policy()        # The policy that has to be learned.
+    policy = Agent.Policy(state_size=8)        # The policy that has to be learned.
     optimizer = optim.Adam(policy.parameters(), lr=1e-2)
 
     rewards = []             # This list tracks all rewards given to all of the agents.
@@ -64,6 +64,9 @@ def run_new_weather(): # This function is run after a new weather data point is 
             
     newest_agent = agents[-1]
     newest_agent.save_weather_data(new_weather)
+    newest_agent.act(policy)
+    
+    return newest_agent.action
 
 # The global variables get initialized. "rewards" can be saved on disk. All other variables have to be kept in memory.
 
@@ -77,6 +80,6 @@ if NEW_POWER_STATUS: # As often as possible
     run_new_power()
 
 if NEW_WEATHER_STATUS: # Every 15min/30min
-    run_new_weather()
+    proposed_action = run_new_weather()
 
 
