@@ -35,6 +35,8 @@ class Agent:
         self.use_cuda = use_cuda
         self.initial_weather_data = None
         self.power_list = []
+        self.action = None
+        self.log_prob = None
         self.reward = -np.Inf
         
     def save_weather_data(weather_data):
@@ -50,8 +52,8 @@ class Agent:
             state = state.cuda()
         probs = policy(state).cpu()
         m = Categorical(probs)
-        action = m.sample()
-        return action.item(), m.log_prob(action)
+        self.action = m.sample()
+        self.log_prob = m.log_prob(self.action)
     
     def get_reward(self, action, history_power_mean):
         median = median(self.power_list)
@@ -63,11 +65,10 @@ class Agent:
             
         return reward
     
-    def learn(self, policy, history_power_mean, optimizer):
-        action, log_prob = self.act(policy)
-        self.reward = self.get_reward(action, history_power_mean)
+    def learn(self, history_power_mean, optimizer):
+        self.reward = self.get_reward(self.action, history_power_mean)
         
-        policy_loss = -self.reward*log_prob
+        policy_loss = -self.reward*self.log_prob
         
         optimizer.zero_grad()
         policy_loss.backward()
