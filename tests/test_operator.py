@@ -22,15 +22,18 @@ class TestOperator(unittest.TestCase):
     def test_call_run(self):
         with open("tests/resources/mock_opr_config.json") as file:
             mock_opr_config = json.load(file)
+        with open("tests/resources/mock_result.json") as file:
+            mock_result = json.load(file)
         filter_handler = init_filter_handler(mock_opr_config)
+        mock_kafka_producer = MockKafkaProducer(mock_result)
         mock_operator = MockOperator()
         mock_operator.init(
             kafka_consumer=None,
-            kafka_producer=None,
+            kafka_producer=mock_kafka_producer,
             filter_handler=filter_handler,
-            output_topic=None,
-            pipeline_id=None,
-            operator_id=None
+            output_topic="test_topic",
+            pipeline_id="test_pipeline",
+            operator_id="test_operator"
         )
         for message in mock_messages:
             mock_operator._OperatorBase__call_run(message)

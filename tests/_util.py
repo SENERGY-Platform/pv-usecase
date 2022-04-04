@@ -48,3 +48,22 @@ class MockOperator(util.OperatorBase):
 
     def run(self, data, selector):
         return getattr(self, selector)(**data)
+
+
+class MockKafkaProducer:
+    def __init__(self, result):
+        self.__result = result
+        self.__count = 0
+
+    def produce(self, topic, value, key):
+        assert self.__count < 1
+        assert topic == self.__result["topic"]
+        assert key == self.__result["key"]
+        assert isinstance(value, str)
+        value = json.loads(value)
+        assert set(value) == set(self.__result["value"])
+        assert value["pipeline_id"] == self.__result["value"]["pipeline_id"]
+        assert value["operator_id"] == self.__result["value"]["operator_id"]
+        assert isinstance(value["analytics"], dict)
+        assert isinstance(value["time"], str)
+        self.__count += 1
