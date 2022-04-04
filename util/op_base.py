@@ -129,4 +129,10 @@ class OperatorBase:
         return self.__stopped
 
     def run(self, selector, data):
+        """
+        Subclasses must override this method.
+        :param selector: Name of a selector identifying the extracted data.
+        :param data: Dictionary containing data extracted from a message.
+        :return: Result data or None.
+        """
         pass
