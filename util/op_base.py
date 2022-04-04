@@ -43,13 +43,15 @@ def on_lost(_, p):
 
 
 class OperatorBase:
-    def __init__(self, kafka_consumer: confluent_kafka.Consumer, kafka_producer: confluent_kafka.Producer, filter_handler: mf_lib.FilterHandler, poll_timeout: float = 1.0):
-        self.__kafka_consumer = kafka_consumer
-        self.__kafka_producer = kafka_producer
-        self.__filter_handler = filter_handler
-        self.__poll_timeout = poll_timeout
-        self.__stop = False
-        self.__stopped = False
+    def __new__(cls):
+        obj = super(OperatorBase, cls).__new__(cls)
+        setattr(obj, f"_{OperatorBase.__name__}__kafka_consumer", None)
+        setattr(obj, f"_{OperatorBase.__name__}__kafka_producer", None)
+        setattr(obj, f"_{OperatorBase.__name__}__filter_handler", None)
+        setattr(obj, f"_{OperatorBase.__name__}__poll_timeout", None)
+        setattr(obj, f"_{OperatorBase.__name__}__stop", False)
+        setattr(obj, f"_{OperatorBase.__name__}__stopped", False)
+        return obj
 
     def __run(self):
         sources = self.__filter_handler.get_sources()
@@ -88,7 +90,11 @@ class OperatorBase:
                 self.__stop = True
         self.__stopped = True
 
-    def start(self):
+    def start(self, kafka_consumer: confluent_kafka.Consumer, kafka_producer: confluent_kafka.Producer, filter_handler: mf_lib.FilterHandler, poll_timeout: float = 1.0):
+        self.__kafka_consumer = kafka_consumer
+        self.__kafka_producer = kafka_producer
+        self.__filter_handler = filter_handler
+        self.__poll_timeout = poll_timeout
         self.__run()
 
     def stop(self):
