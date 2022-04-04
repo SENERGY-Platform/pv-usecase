@@ -20,10 +20,6 @@ import unittest
 
 class TestOperator(unittest.TestCase):
     def test_call_run(self):
-        with open("tests/resources/mock_opr_config.json") as file:
-            mock_opr_config = json.load(file)
-        with open("tests/resources/mock_result.json") as file:
-            mock_result = json.load(file)
         filter_handler = init_filter_handler(mock_opr_config)
         mock_kafka_producer = MockKafkaProducer(mock_result)
         mock_operator = MockOperator()
