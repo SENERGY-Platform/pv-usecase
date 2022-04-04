@@ -44,7 +44,7 @@ def on_lost(_, p):
 
 
 class OperatorBase:
-    def __new__(cls):
+    def __new__(cls, *args, **kwargs):
         obj = super(OperatorBase, cls).__new__(cls)
         setattr(obj, f"_{OperatorBase.__name__}__kafka_consumer", None)
         setattr(obj, f"_{OperatorBase.__name__}__kafka_producer", None)
