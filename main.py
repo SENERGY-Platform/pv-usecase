@@ -43,7 +43,7 @@ if __name__ == '__main__':
     util.logger.debug(f"kafka producer config: {kafka_producer_config}")
     kafka_consumer = confluent_kafka.Consumer(kafka_consumer_config, logger=util.logger)
     kafka_producer = confluent_kafka.Producer(kafka_producer_config, logger=util.logger)
-    operator = algo.Operator()
+    operator = algo.Operator(device_id=opr_config.config.device_id, import_id=opr_config.config.import_id)
     operator.init(
         kafka_consumer=kafka_consumer,
         kafka_producer=kafka_producer,

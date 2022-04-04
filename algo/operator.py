@@ -20,5 +20,9 @@ import util
 
 
 class Operator(util.OperatorBase):
+    def __init__(self, device_id, import_id):
+        self.device_id = device_id
+        self.import_id = import_id
+
     def run(self, data, selector):
         pass
