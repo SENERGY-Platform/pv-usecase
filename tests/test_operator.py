@@ -32,9 +32,6 @@ class TestOperator(unittest.TestCase):
         for message in mock_messages:
             mock_operator._OperatorBase__call_run(message)
 
-    def test_run(self):
-        pass
-
 
 if __name__ == '__main__':
     unittest.main()
