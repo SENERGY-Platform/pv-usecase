@@ -45,10 +45,11 @@ if __name__ == '__main__':
     kafka_consumer = confluent_kafka.Consumer(kafka_consumer_config, logger=util.logger)
     kafka_producer = confluent_kafka.Producer(kafka_producer_config, logger=util.logger)
     operator = algo.Operator()
-    operator.start(
+    operator.init(
         kafka_consumer=kafka_consumer,
         kafka_producer=kafka_producer,
         filter_handler=filter_handler
     )
+    operator.start()
     kafka_consumer.close()
     kafka_producer.flush()

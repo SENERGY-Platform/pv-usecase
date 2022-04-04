@@ -83,11 +83,13 @@ class OperatorBase:
                 self.__stop = True
         self.__stopped = True
 
-    def start(self, kafka_consumer: confluent_kafka.Consumer, kafka_producer: confluent_kafka.Producer, filter_handler: mf_lib.FilterHandler, poll_timeout: float = 1.0):
+    def init(self, kafka_consumer: confluent_kafka.Consumer, kafka_producer: confluent_kafka.Producer, filter_handler: mf_lib.FilterHandler, poll_timeout: float = 1.0):
         self.__kafka_consumer = kafka_consumer
         self.__kafka_producer = kafka_producer
         self.__filter_handler = filter_handler
         self.__poll_timeout = poll_timeout
+
+    def start(self):
         sources = self.__filter_handler.get_sources()
         if sources:
             self.__kafka_consumer.subscribe(
