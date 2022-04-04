@@ -109,6 +109,12 @@ class OperatorBase:
         self.__operator_id = operator_id
         self.__poll_timeout = poll_timeout
 
+    def get_pipeline_id(self) -> str:
+        return self.__pipeline_id
+
+    def get_operator_id(self) -> str:
+        return self.__operator_id
+
     def start(self):
         sources = self.__filter_handler.get_sources()
         if sources:
