@@ -125,7 +125,7 @@ class OperatorBase:
     def stop(self):
         self.__stop = True
 
-    def is_alive(self):
+    def is_alive(self) -> bool:
         return self.__stopped
 
     def run(self, data: typing.Dict[str, typing.Any], selector: str):
