@@ -48,6 +48,9 @@ class OperatorBase:
         setattr(obj, f"_{OperatorBase.__name__}__kafka_consumer", None)
         setattr(obj, f"_{OperatorBase.__name__}__kafka_producer", None)
         setattr(obj, f"_{OperatorBase.__name__}__filter_handler", None)
+        setattr(obj, f"_{OperatorBase.__name__}__output_topic", None)
+        setattr(obj, f"_{OperatorBase.__name__}__pipeline_id", None)
+        setattr(obj, f"_{OperatorBase.__name__}__operator_id", None)
         setattr(obj, f"_{OperatorBase.__name__}__poll_timeout", None)
         setattr(obj, f"_{OperatorBase.__name__}__stop", False)
         setattr(obj, f"_{OperatorBase.__name__}__stopped", False)
@@ -83,10 +86,13 @@ class OperatorBase:
                 self.__stop = True
         self.__stopped = True
 
-    def init(self, kafka_consumer: confluent_kafka.Consumer, kafka_producer: confluent_kafka.Producer, filter_handler: mf_lib.FilterHandler, poll_timeout: float = 1.0):
+    def init(self, kafka_consumer: confluent_kafka.Consumer, kafka_producer: confluent_kafka.Producer, filter_handler: mf_lib.FilterHandler, output_topic: str, pipeline_id: str, operator_id: str, poll_timeout: float = 1.0):
         self.__kafka_consumer = kafka_consumer
         self.__kafka_producer = kafka_producer
         self.__filter_handler = filter_handler
+        self.__output_topic = output_topic
+        self.__pipeline_id = pipeline_id
+        self.__operator_id = operator_id
         self.__poll_timeout = poll_timeout
 
     def start(self):

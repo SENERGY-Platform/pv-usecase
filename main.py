@@ -48,7 +48,10 @@ if __name__ == '__main__':
     operator.init(
         kafka_consumer=kafka_consumer,
         kafka_producer=kafka_producer,
-        filter_handler=filter_handler
+        filter_handler=filter_handler,
+        output_topic=dep_config.output,
+        pipeline_id=dep_config.pipeline_id,
+        operator_id=dep_config.operator_id
     )
     operator.start()
     kafka_consumer.close()
