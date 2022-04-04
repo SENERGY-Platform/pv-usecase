@@ -21,6 +21,7 @@ import confluent_kafka
 import mf_lib
 import json
 import typing
+import datetime
 
 
 def log_kafka_sub_action(action: str, partitions: typing.List):
@@ -61,10 +62,23 @@ class OperatorBase:
             for result in self.__filter_handler.get_results(message=message):
                 if not result.ex:
                     for f_id in result.filter_ids:
-                        self.run(
+                        result = self.run(
                             selector=self.__filter_handler.get_filter_args(id=f_id)["selector"],
                             data=result.data
                         )
+                        if result is not None:
+                            self.__kafka_producer.produce(
+                                self.__output_topic,
+                                json.dumps(
+                                    {
+                                        "pipeline_id": self.__pipeline_id,
+                                        "operator_id": self.__operator_id,
+                                        "analytics": result,
+                                        "time": "{}Z".format(datetime.datetime.utcnow().isoformat())
+                                    }
+                                ),
+                                self.__operator_id
+                            )
                 else:
                     logger.error(result.ex)
         except mf_lib.exceptions.NoFilterError:
