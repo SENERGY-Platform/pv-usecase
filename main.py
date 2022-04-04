@@ -18,7 +18,6 @@ import util
 import algo
 import json
 import confluent_kafka
-import uuid
 import mf_lib
 
 if __name__ == '__main__':
@@ -34,7 +33,7 @@ if __name__ == '__main__':
     kafka_brokers = ",".join(util.get_kafka_brokers(zk_hosts=dep_config.zk_quorum, zk_path=dep_config.zk_brokers_path))
     kafka_consumer_config = {
         "metadata.broker.list": kafka_brokers,
-        "group.id": f"pv-usecase-operator_{uuid.uuid4()}",
+        "group.id": dep_config.config_application_id,
         "auto.offset.reset": dep_config.consumer_auto_offset_reset_config
     }
     kafka_producer_config = {
