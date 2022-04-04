@@ -19,6 +19,8 @@ import algo
 import json
 import confluent_kafka
 import mf_lib
+import cncr_wdg
+import signal
 
 if __name__ == '__main__':
     util.print_init(name="pv-usecase-operator", git_info_file="git_commit")
@@ -52,6 +54,13 @@ if __name__ == '__main__':
         pipeline_id=dep_config.pipeline_id,
         operator_id=dep_config.operator_id
     )
+    watchdog = cncr_wdg.Watchdog(
+        monitor_callables=[operator.is_alive],
+        shutdown_callables=[operator.stop],
+        join_callables=[kafka_consumer.close, kafka_producer.flush],
+        shutdown_signals=[signal.SIGTERM, signal.SIGINT, signal.SIGABRT],
+        logger=util.logger
+    )
+    watchdog.start(delay=5)
     operator.start()
-    kafka_consumer.close()
-    kafka_producer.flush()
+    watchdog.join()
