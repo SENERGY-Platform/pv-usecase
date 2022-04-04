@@ -45,5 +45,5 @@ class MockOperator(util.OperatorBase):
         assert b == mock_messages[1]["data"]["val_b"]
         assert timestamp == mock_messages[1]["data"]["time"]
 
-    def run(self, selector, data):
+    def run(self, data, selector):
         getattr(self, selector)(**data)

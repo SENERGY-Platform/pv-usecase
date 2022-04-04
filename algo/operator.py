@@ -20,5 +20,5 @@ import util
 
 
 class Operator(util.OperatorBase):
-    def run(self, selector, data):
+    def run(self, data, selector):
         pass
