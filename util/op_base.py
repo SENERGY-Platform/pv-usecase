@@ -128,7 +128,7 @@ class OperatorBase:
     def is_alive(self):
         return self.__stopped
 
-    def run(self, selector, data):
+    def run(self, selector: str, data: typing.Dict[str, ...]):
         """
         Subclasses must override this method.
         :param selector: Name of a selector identifying the extracted data.
