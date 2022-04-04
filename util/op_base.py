@@ -53,36 +53,29 @@ class OperatorBase:
         setattr(obj, f"_{OperatorBase.__name__}__stopped", False)
         return obj
 
-    def __run(self):
-        sources = self.__filter_handler.get_sources()
-        if sources:
-            self.__kafka_consumer.subscribe(
-                sources,
-                on_assign=on_assign,
-                on_revoke=on_revoke,
-                on_lost=on_lost
-            )
-        else:
-            raise RuntimeError("no sources")
+    def __call_run(self, message):
+        try:
+            for result in self.__filter_handler.get_results(message=message):
+                if not result.ex:
+                    for f_id in result.filter_ids:
+                        self.run(
+                            selector=self.__filter_handler.get_filter_args(id=f_id)["selector"],
+                            data=result.data
+                        )
+                else:
+                    logger.error(result.ex)
+        except mf_lib.exceptions.NoFilterError:
+            pass
+        except mf_lib.exceptions.MessageIdentificationError as ex:
+            logger.error(ex)
+
+    def __loop(self):
         while not self.__stop:
             try:
                 msg_obj = self.__kafka_consumer.poll(timeout=self.__poll_timeout)
                 if msg_obj:
                     if not msg_obj.error():
-                        try:
-                            for result in self.__filter_handler.get_results(message=json.loads(msg_obj.value())):
-                                if not result.ex:
-                                    for f_id in result.filter_ids:
-                                        self.run(
-                                            selector=self.__filter_handler.get_filter_args(id=f_id)["selector"],
-                                            data=result.data
-                                        )
-                                else:
-                                    logger.error(result.ex)
-                        except mf_lib.exceptions.NoFilterError:
-                            pass
-                        except mf_lib.exceptions.MessageIdentificationError as ex:
-                            logger.error(ex)
+                        self.__call_run(json.loads(msg_obj.value()))
                     else:
                         raise confluent_kafka.KafkaException(msg_obj.error())
             except Exception as ex:
@@ -95,7 +88,17 @@ class OperatorBase:
         self.__kafka_producer = kafka_producer
         self.__filter_handler = filter_handler
         self.__poll_timeout = poll_timeout
-        self.__run()
+        sources = self.__filter_handler.get_sources()
+        if sources:
+            self.__kafka_consumer.subscribe(
+                sources,
+                on_assign=on_assign,
+                on_revoke=on_revoke,
+                on_lost=on_lost
+            )
+        else:
+            raise RuntimeError("no sources")
+        self.__loop()
 
     def stop(self):
         self.__stop = True
