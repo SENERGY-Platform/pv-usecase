@@ -21,4 +21,4 @@ import util
 
 class Operator(util.OperatorBase):
     def run(self, selector, data):
-        util.logger.debug(f"selector={selector} data={data}")
+        pass
