@@ -1,6 +1,7 @@
 {
   "config": {
     "device_id": "device:1",
+    "import_id": "import:1",
     "selectors": [
       {
         "name": "func_1",
