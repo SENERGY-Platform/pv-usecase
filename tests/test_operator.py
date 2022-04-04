@@ -27,7 +27,10 @@ class TestOperator(unittest.TestCase):
         mock_operator.init(
             kafka_consumer=None,
             kafka_producer=None,
-            filter_handler=filter_handler
+            filter_handler=filter_handler,
+            output_topic=None,
+            pipeline_id=None,
+            operator_id=None
         )
         for message in mock_messages:
             mock_operator._OperatorBase__call_run(message)
