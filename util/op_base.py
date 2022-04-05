@@ -77,28 +77,31 @@ class OperatorBase:
             logger.error(ex)
         return run_results
 
+    def __route(self):
+        msg_obj = self.__kafka_consumer.poll(timeout=self.__poll_timeout)
+        if msg_obj:
+            if not msg_obj.error():
+                results = self.__call_run(json.loads(msg_obj.value()))
+                for result in results:
+                    self.__kafka_producer.produce(
+                        self.__output_topic,
+                        json.dumps(
+                            {
+                                "pipeline_id": self.__pipeline_id,
+                                "operator_id": self.__operator_id,
+                                "analytics": result,
+                                "time": "{}Z".format(datetime.datetime.utcnow().isoformat())
+                            }
+                        ),
+                        self.__operator_id
+                    )
+            else:
+                raise confluent_kafka.KafkaException(msg_obj.error())
+
     def __loop(self):
         while not self.__stop:
             try:
-                msg_obj = self.__kafka_consumer.poll(timeout=self.__poll_timeout)
-                if msg_obj:
-                    if not msg_obj.error():
-                        results = self.__call_run(json.loads(msg_obj.value()))
-                        for result in results:
-                            self.__kafka_producer.produce(
-                                self.__output_topic,
-                                json.dumps(
-                                    {
-                                        "pipeline_id": self.__pipeline_id,
-                                        "operator_id": self.__operator_id,
-                                        "analytics": result,
-                                        "time": "{}Z".format(datetime.datetime.utcnow().isoformat())
-                                    }
-                                ),
-                                self.__operator_id
-                            )
-                    else:
-                        raise confluent_kafka.KafkaException(msg_obj.error())
+                self.__route()
             except Exception as ex:
                 logger.exception(ex)
                 self.__stop = True
