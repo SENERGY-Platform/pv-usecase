@@ -22,7 +22,7 @@ import math
 import kazoo.client
 import json
 import typing
-import uuid
+import hashlib
 
 
 def print_init(name, git_info_file):
@@ -98,9 +98,22 @@ def get_selector(filter_value, selectors: typing.List):
     raise RuntimeError(f"no selector for {filter_value}")
 
 
+def hash_str(obj: str) -> str:
+    return hashlib.sha256(obj.encode()).hexdigest()
+
+
+def hash_list(obj: typing.List) -> str:
+    return hash_str("".join(obj))
+
+
+def hash_dict(obj: typing.Dict) -> str:
+    items = ["{}{}".format(key, value) for key, value in obj.items()]
+    items.sort()
+    return hash_list(items)
+
+
 def gen_filter(input_topic, selectors):
-    return {
-        "id": str(uuid.uuid4()),
+    filter = {
         "source": input_topic.name,
         "mappings": {f"{m.dest}:data": m.source for m in input_topic.mappings},
         "identifiers": gen_identifiers(name=input_topic.name, f_type=input_topic.filterType, f_value=input_topic.filterValue),
@@ -108,3 +121,12 @@ def gen_filter(input_topic, selectors):
             "selector": get_selector(filter_value=input_topic.filterValue, selectors=selectors)
         }
     }
+    items = [
+        filter["source"],
+        hash_dict(filter["mappings"]),
+        hash_dict(filter["args"])
+    ]
+    for i in filter["identifiers"]:
+        items.append(hash_dict(i))
+    filter["id"] = hash_list(items)
+    return filter
