@@ -38,18 +38,15 @@ class TestOperator(unittest.TestCase):
         try:
             with open("tests/resources/opr_config.json") as file:
                 opr_config = json.load(file)
-        except FileNotFoundError:
-            self.skipTest()
-        operator = algo.Operator(device_id="device:pv:1", import_id="weather_import")
-        operator.init(
-            kafka_consumer=None,
-            kafka_producer=None,
-            filter_handler=init_filter_handler(opr_config),
-            output_topic=None,
-            pipeline_id=None,
-            operator_id=None
-        )
-        try:
+            operator = algo.Operator(device_id="device:pv:1", import_id="weather_import")
+            operator.init(
+                kafka_consumer=None,
+                kafka_producer=None,
+                filter_handler=init_filter_handler(opr_config),
+                output_topic=None,
+                pipeline_id=None,
+                operator_id=None
+            )
             with open("tests/resources/messages.txt") as file:
                 for line in file:
                     results = operator._OperatorBase__call_run(json.loads(line.strip()))
