@@ -50,7 +50,7 @@ def run_new_weather(): # This function is run after a new weather data point is 
     if len(agents) < 8:
         agents.append(Agent.Agent(use_cuda))
     elif len(agents) == 8:
-        oldest_agent = deque.popleft()
+        oldest_agent = agents.popleft()
         agents.append(Agent.Agent(use_cuda))
         history_power_mean = np.mean(np.array(history_power))
         oldest_agent.learn(policy, history_power_mean, optimizer)
