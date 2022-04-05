@@ -15,24 +15,48 @@
 """
 
 from ._util import *
+import algo
 import unittest
 
 
 class TestOperator(unittest.TestCase):
-    def test_call_run(self):
-        filter_handler = init_filter_handler(mock_opr_config)
-        mock_kafka_producer = MockKafkaProducer(mock_result)
+    def test_route(self):
+        mock_kafka_consumer = MockKafkaConsumer(mock_messages)
         mock_operator = MockOperator()
         mock_operator.init(
-            kafka_consumer=None,
-            kafka_producer=mock_kafka_producer,
-            filter_handler=filter_handler,
+            kafka_consumer=mock_kafka_consumer,
+            kafka_producer=MockKafkaProducer(mock_result),
+            filter_handler=init_filter_handler(mock_opr_config),
             output_topic="test_topic",
             pipeline_id="test_pipeline",
             operator_id="test_operator"
         )
-        for message in mock_messages:
-            mock_operator._OperatorBase__call_run(message)
+        while not mock_kafka_consumer.empty():
+            mock_operator._OperatorBase__route()
+
+    def test_run(self):
+        try:
+            with open("tests/resources/opr_config.json") as file:
+                opr_config = json.load(file)
+        except FileNotFoundError:
+            self.skipTest()
+        operator = algo.Operator(device_id="device:pv:1", import_id="weather_import")
+        operator.init(
+            kafka_consumer=None,
+            kafka_producer=None,
+            filter_handler=init_filter_handler(opr_config),
+            output_topic=None,
+            pipeline_id=None,
+            operator_id=None
+        )
+        try:
+            with open("tests/resources/messages.txt") as file:
+                for line in file:
+                    results = operator._OperatorBase__call_run(json.loads(line.strip()))
+                    for result in results:
+                        pass
+        except FileNotFoundError as ex:
+            self.skipTest(ex)
 
 
 if __name__ == '__main__':
