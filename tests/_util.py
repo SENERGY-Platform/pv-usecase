@@ -18,6 +18,7 @@ import util
 import mf_lib
 import logging
 import json
+import queue
 
 logger = logging.getLogger("operator")
 logger.disabled = True
@@ -54,6 +55,34 @@ class MockOperator(util.OperatorBase):
 
     def run(self, data, selector):
         return getattr(self, selector)(**data)
+
+
+class MockKafkaMessage:
+    def __init__(self, value=None, err_obj=None):
+        self.__value = value
+        self.__err_obj = err_obj
+
+    def error(self):
+        return self.__err_obj
+
+    def value(self):
+        return self.__value
+
+
+class MockKafkaConsumer:
+    def __init__(self, messages):
+        self.__queue = queue.Queue()
+        for m in messages:
+            self.__queue.put(MockKafkaMessage(json.dumps(m)))
+
+    def poll(self, timeout=1.0):
+        try:
+            return self.__queue.get(timeout=timeout)
+        except queue.Empty:
+            pass
+
+    def empty(self):
+        return self.__queue.empty()
 
 
 class MockKafkaProducer:
