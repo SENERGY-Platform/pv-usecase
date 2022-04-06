@@ -113,13 +113,13 @@ def hash_dict(obj: typing.Dict) -> str:
     return hash_list(items)
 
 
-def gen_filter(input_topic, selectors):
+def gen_filter(input_topic, selectors=None):
     filter = {
         "source": input_topic.name,
         "mappings": {f"{m.dest}:data": m.source for m in input_topic.mappings},
         "identifiers": gen_identifiers(name=input_topic.name, f_type=input_topic.filterType, f_value=input_topic.filterValue),
         "args": {
-            "selector": get_selector(mappings=input_topic.mappings, selectors=selectors)
+            "selector": get_selector(mappings=input_topic.mappings, selectors=selectors) if selectors else None
         }
     }
     items = [

@@ -33,11 +33,12 @@ class Config(simple_struct.Structure):
     device_id: str = None
     import_id: str = None
     logger_level = "warning"
-    selectors = [Selector]
+    selectors: typing.List[Selector] = None
 
     def __init__(self, d, **kwargs):
         super().__init__(d, **kwargs)
-        self.selectors = [Selector(s) for s in self.selectors]
+        if self.selectors:
+            self.selectors = [Selector(s) for s in self.selectors]
 
 
 class Mapping(simple_struct.Structure):
