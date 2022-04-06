@@ -30,8 +30,8 @@ class Selector(simple_struct.Structure):
 
 
 class Config(simple_struct.Structure):
-    device_id: str = None
-    import_id: str = None
+    energy_src_id: str = None
+    weather_src_id: str = None
     logger_level = "warning"
     selectors: typing.List[Selector] = None
 

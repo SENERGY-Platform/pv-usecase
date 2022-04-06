@@ -38,7 +38,7 @@ class TestOperator(unittest.TestCase):
         try:
             with open("tests/resources/opr_config.json") as file:
                 opr_config = json.load(file)
-            operator = algo.Operator(device_id="device:pv:1", import_id="weather_import")
+            operator = algo.Operator(energy_src_id="device:pv:1", weather_src_id="weather_import")
             operator.init(
                 kafka_consumer=None,
                 kafka_producer=None,
