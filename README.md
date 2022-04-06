@@ -2,7 +2,7 @@
 
 ## Config options
 
-| key              | json type                                            | description                                               | required |
+| key              | type                                                 | description                                               | required |
 |------------------|------------------------------------------------------|-----------------------------------------------------------|----------|
 | `energy_src_id`  | string                                               | ID of source providing energy data.                       | yes      |
 | `weather_src_id` | string                                               | ID of source providing weather forcast data.              | yes      |
