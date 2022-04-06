@@ -17,6 +17,7 @@
 __all__ = ("OperatorConfig", )
 
 import simple_struct
+import json
 import typing
 
 
@@ -38,7 +39,7 @@ class Config(simple_struct.Structure):
     def __init__(self, d, **kwargs):
         super().__init__(d, **kwargs)
         if self.selectors:
-            self.selectors = [Selector(s) for s in self.selectors]
+            self.selectors = [Selector(s) for s in json.loads(self.selectors)]
 
 
 class Mapping(simple_struct.Structure):
