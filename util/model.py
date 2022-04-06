@@ -22,7 +22,11 @@ import typing
 
 class Selector(simple_struct.Structure):
     name: str = None
-    value: str = None
+    args: typing.Set[str] = None
+
+    def __init__(self, d, **kwargs):
+        super().__init__(d, **kwargs)
+        self.args = set(self.args)
 
 
 class Config(simple_struct.Structure):

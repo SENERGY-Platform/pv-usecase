@@ -91,11 +91,12 @@ def gen_identifiers(name: str, f_type: str, f_value: str):
         ]
 
 
-def get_selector(filter_value, selectors: typing.List):
+def get_selector(mappings: typing.List, selectors: typing.List):
+    dst_fields = set(m.dest for m in mappings)
     for s in selectors:
-        if filter_value == s.value:
+        if dst_fields == s.args:
             return s.name
-    raise RuntimeError(f"no selector for {filter_value}")
+    raise RuntimeError(f"no selector for {dst_fields}")
 
 
 def hash_str(obj: str) -> str:
@@ -118,7 +119,7 @@ def gen_filter(input_topic, selectors):
         "mappings": {f"{m.dest}:data": m.source for m in input_topic.mappings},
         "identifiers": gen_identifiers(name=input_topic.name, f_type=input_topic.filterType, f_value=input_topic.filterValue),
         "args": {
-            "selector": get_selector(filter_value=input_topic.filterValue, selectors=selectors)
+            "selector": get_selector(mappings=input_topic.mappings, selectors=selectors)
         }
     }
     items = [

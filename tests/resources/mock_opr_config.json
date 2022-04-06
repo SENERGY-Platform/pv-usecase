@@ -5,11 +5,11 @@
     "selectors": [
       {
         "name": "func_1",
-        "value": "device:1"
+        "args": ["a", "timestamp"]
       },
       {
         "name": "func_2",
-        "value": "import:1"
+        "args": ["a", "b", "timestamp"]
       }
     ],
     "logger_level": "debug"
