@@ -27,25 +27,22 @@ class Policy(nn.Module):
 
 
 class Agent:
-    def __init__(self, use_cuda):
-        self.use_cuda = use_cuda
+    def __init__(self):
         self.initial_weather_data = None
         self.power_list = []
         self.action = None
         self.log_prob = None
         self.reward = None
         
-    def save_weather_data(weather_data):
+    def save_weather_data(self,weather_data):
         self.initial_weather_data = weather_data
         
-    def update_power_list(new_power_value):
+    def update_power_list(self,new_power_value):
         self.power_list.append(new_power_value)
         
     def act(self, policy):
         state = self.initial_weather_data
         state = torch.from_numpy(state).float().unsqueeze(0)
-        if self.use_cuda:
-            state = state.cuda()
         probs = policy(state).cpu()
         m = Categorical(probs)
         action = m.sample()
