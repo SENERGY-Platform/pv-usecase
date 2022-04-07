@@ -1,14 +1,18 @@
 import numpy as np
 
-def preprocess_power_data():
+def preprocess_power_data(new_power_data):
 
-    # Load and preprocess power data here.
-
+    time = new_power_data['value']['root']['time']
+    power = new_power_data['value']['root']['energy']
     return power
 
 
-def preprocess_weather_data():
+def preprocess_weather_data(new_weather_data):
 
-    # Load and preprocess weather data here.
+    aux_list = [[data_point['value']['time'], data_point['value']['instant_air_temperature'], data_point['value']['instant_relative_humidity'],
+                 data_point['value']['instant_ultraviolet_index_clear_sky'], data_point['value']['1_hours_precipitation_amount'],
+                 data_point['value']['instant_cloud_area_fraction']] for data_point in new_weather_data]
 
-    return (time, temp, humid, uv, rain_prob, cloud)
+    weather_array = np.array(aux_list)
+
+    return weather_array
