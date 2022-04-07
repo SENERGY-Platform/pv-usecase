@@ -36,20 +36,19 @@ def init_algo():             # This function initializes all global variables of
     return agents, history_power, policy, optimizer, rewards, use_cuda, history_time_delta
 
 
-def run_new_power(): # This function is run after a new solar power value is input.
-    new_power = aux_functions.load_power_data()
+def run_new_power(new_power): # This function is run after a new solar power value is input.
+    #new_power = aux_functions.load_power_data()
     history_power = aux_functions.update_history_power(history_power, new_power, history_time_delta) # Update the power history from the last 1/2/4 weeks.
         
     for agent in agents:
         agent.update_power_list(new_power) # Update the power list for every agent. (The power list of an agent is used for computation of the reward.)
 
 
-def run_new_weather(): # This function is run after a new weather data point is input; i.e. once each 15min/30min.
-    new_weather = aux_functions.load_weather_data()
+def run_new_weather(new_weather_data): # This function is run after a new weather data point is input; i.e. once each 15min/30min.
 
     policy.eval()      # The current policy is used for prediction.
     with torch.no_grad():
-        input = torch.Tensor(new_weather)
+        input = torch.Tensor(new_weather_data)
         if use_cuda:
             input.cuda()
         output = policy(input)
