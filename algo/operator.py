@@ -24,5 +24,66 @@ class Operator(util.OperatorBase):
         self.energy_src_id = energy_src_id
         self.weather_src_id = weather_src_id
 
+        self.weather_same_timestamp = []
+
+        self.replay_buffer = deque(maxlen=50)
+        self.power_history = deque(maxlen=history_power_td)
+        
+        self.agents = deque(maxlen=4)
+        self.policy = Agent.policy(state_size=weather_dim)
+        self.optimizer = optim.Adam(self.policy.parameters(), lr=1e-2)
+
+        self.rewards = []
+
+
+
+
+    def run_new_weather(self, new_weather_data):
+
+        self.policy.eval()      # The current policy is used for prediction.
+        with torch.no_grad():
+            input = torch.Tensor(new_weather_data)
+            output = self.policy(input)
+        self.policy.train()
+
+    
+        if len(self.agents) < 4:
+            self.agents.append(Agent.Agent())
+        elif len(self.agents) == 4:
+            oldest_agent = self.agents.popleft()
+            self.agents.append(Agent.Agent())
+            oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
+            oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
+            oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, self.optimizer)
+            del oldest_agent
+            
+        torch.save(self.policy.state_dict(), 'policy.pt')
+        with open('rewards.pickle', 'wb') as f:
+            pickle.dump(self.rewards, f)
+            
+           
+        newest_agent = self.agents[-1]
+        newest_agent.save_weather_data(new_weather_data)
+        newest_agent.act(self.policy)
+    
+        return output
+
+    def run_new_power(self, new_power_data):
+        self.history_power.append(new_power_data)
+
+        for agent in self.agents:
+            agent.update_power_list(new_power_data)
+
     def run(self, data, selector):
-        pass
+
+        if selector['name'] == 'weather_func':
+            if self.weather_same_timestamp != []:
+                if data['time'] == self.weather_same_time_stamp[-1]['time']:
+                    self.weather_same_timestamp.append(data)
+                elif data['time'] != self.weather_same_timestamp[-1]['time']:
+                    new_weather_data = self.weather_same_timestamp
+                    self.weather_same_timestamp = []
+                    output = self.run_new_weather(new_weather_data)
+                    return output
+        elif selector['name'] == 'power_func':
+            self.run_new_power()
