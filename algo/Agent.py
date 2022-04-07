@@ -12,22 +12,19 @@ from torch.distributions import Categorical
 
 
 class Policy(nn.Module):
-    def __init__(self, state_size, action_size=2):
+    def __init__(self, state_size):
         super().__init__()
-        self.fc1 = nn.Linear(state_size, 64)
+
+        self.fc1 = nn.Linear(state_size, 16)
         nn.init.kaiming_normal_(self.fc1, nonlinearity='relu')
-
-        self.fc2 = nn.Linear(64, 64)
-        nn.init.kaiming_normal_(self.fc2, nonlinearity='relu')
         
-        self.fc3 = nn.Linear(64, action_size)
-        nn.init.xavier_normal_(self.fc3.weight)
+        self.fc2 = nn.Linear(16, 2)
+        nn.init.xavier_normal_(self.fc2.weight)
 
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return F.softmax(x, dim=1)
+    def forward(self, input):
+        x = F.relu(self.fc1(input))
+        x = F.softmax(self.fc2(x), dim=1)
+        return x
 
 
 class Agent:
