@@ -39,10 +39,11 @@ class Operator(util.OperatorBase):
 
 
     def run_new_weather(self, new_weather_data):
+        new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
 
         self.policy.eval()      # The current policy is used for prediction.
         with torch.no_grad():
-            input = torch.Tensor(new_weather_data)
+            input = torch.Tensor(new_weather_array)
             output = self.policy(input)
         self.policy.train()
 
@@ -63,16 +64,18 @@ class Operator(util.OperatorBase):
             
            
         newest_agent = self.agents[-1]
-        newest_agent.save_weather_data(new_weather_data)
+        newest_agent.save_weather_data(new_weather_array)
         newest_agent.act(self.policy)
     
         return output
 
     def run_new_power(self, new_power_data):
-        self.history_power.append(new_power_data)
+        new_power_value = aux_functions.preprocess_power_data(new_power_data)
+
+        self.history_power.append(new_power_value)
 
         for agent in self.agents:
-            agent.update_power_list(new_power_data)
+            agent.update_power_list(new_power_value)
 
     def run(self, data, selector):
 
