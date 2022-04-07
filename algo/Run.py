@@ -62,12 +62,12 @@ def run_new_weather(): # This function is run after a new weather data point is 
         oldest_agent = agents.popleft()
         agents.append(Agent.Agent(use_cuda))
         oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(policy)
-        oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean)
+        oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean=sum(history_power)/len(history_power))
         oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, optimizer)
         del oldest_agent
             
-    torch.save(policy.state_dict(), '...policy.pt')
-    with open('...rewards.pickle', 'wb') as f:
+    torch.save(policy.state_dict(), 'policy.pt')
+    with open('rewards.pickle', 'wb') as f:
         pickle.dump(rewards, f)
             
            
@@ -75,7 +75,7 @@ def run_new_weather(): # This function is run after a new weather data point is 
     newest_agent.save_weather_data(new_weather)
     newest_agent.act(policy)
     
-    return newest_agent.action
+    return output
 
 # The global variables get initialized. "rewards" can be saved on disk. All other variables have to be kept in memory.
 

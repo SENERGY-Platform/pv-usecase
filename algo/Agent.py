@@ -1,6 +1,5 @@
 import numpy as np
 
-from statistics import median
 
 import torch
 import torch.nn as nn
@@ -34,7 +33,7 @@ class Agent:
         self.power_list = []
         self.action = None
         self.log_prob = None
-        self.reward = -np.Inf
+        self.reward = None
         
     def save_weather_data(weather_data):
         self.initial_weather_data = weather_data
@@ -49,23 +48,22 @@ class Agent:
             state = state.cuda()
         probs = policy(state).cpu()
         m = Categorical(probs)
-        self.action = m.sample()
-        self.log_prob = m.log_prob(self.action)
+        action = m.sample()
+        log_prob = m.log_prob(action)
+        return  action, log_prob
     
     def get_reward(self, action, history_power_mean):
-        median = median(self.power_list)
+        agents_power_mean = sum(self.power_list)/len(self.power_list)
         
-        if action==1:
-            reward = median-history_power_mean
-        elif action==0:
-            reward = history_power_mean-median
+        if action.item()==1:    # 'YES'
+            reward = agents_power_mean-history_power_mean
+        elif action.item()==0:  # 'NO'
+            reward = history_power_mean-agents_power_mean
             
         return reward
     
-    def learn(self, history_power_mean, optimizer):
-        self.reward = self.get_reward(self.action, history_power_mean)
-        
-        policy_loss = -self.reward*self.log_prob
+    def learn(self, reward, log_prob, optimizer):
+        policy_loss = -reward*log_prob
         
         optimizer.zero_grad()
         policy_loss.backward()
