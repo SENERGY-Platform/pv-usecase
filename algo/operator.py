@@ -20,6 +20,16 @@ import util
 import Agent
 import aux_functions
 
+from collections import deque
+
+import pickle
+
+import numpy as np
+
+import torch
+import torch.optim as optim
+
+
 
 class Operator(util.OperatorBase):
     def __init__(self, energy_src_id, weather_src_id):
