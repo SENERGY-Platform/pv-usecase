@@ -17,6 +17,8 @@
 __all__ = ("Operator", )
 
 import util
+import Agent
+import aux_functions
 
 
 class Operator(util.OperatorBase):
@@ -27,10 +29,10 @@ class Operator(util.OperatorBase):
         self.weather_same_timestamp = []
 
         self.replay_buffer = deque(maxlen=50)
-        self.power_history = deque(maxlen=history_power_td)
+        self.power_history = deque(maxlen=history_power_td) # For history_power_td=60000 the power history of the ~7 days is stored.
         
         self.agents = deque(maxlen=4)
-        self.policy = Agent.policy(state_size=weather_dim)
+        self.policy = Agent.policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
         self.optimizer = optim.Adam(self.policy.parameters(), lr=1e-2)
 
         self.rewards = []
@@ -56,7 +58,11 @@ class Operator(util.OperatorBase):
             oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
             oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
             oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, self.optimizer)
-            del oldest_agent
+            
+        self.replay_buffer.append(self.agents[-1])
+
+        for agent in self.replay_buffer:
+            agent.learn(agent.reward, agent.log_prob, self.optimizer)
             
         torch.save(self.policy.state_dict(), 'policy.pt')
         with open('rewards.pickle', 'wb') as f:
