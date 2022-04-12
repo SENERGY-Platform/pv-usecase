@@ -48,6 +48,8 @@ class Operator(util.OperatorBase):
         self.optimizer = optim.Adam(self.policy.parameters(), lr=1e-2)
 
         self.rewards = []
+        self.rewards_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_rewards.pickle'
+        self.model_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_model.pt'
 
 
 
