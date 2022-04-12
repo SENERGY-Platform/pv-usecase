@@ -79,8 +79,8 @@ class Operator(util.OperatorBase):
         for agent in self.replay_buffer:
             agent.learn(agent.reward, agent.log_prob, self.optimizer)
             
-        torch.save(self.policy.state_dict(), 'policy.pt')
-        with open('rewards.pickle', 'wb') as f:
+        torch.save(self.policy.state_dict(), self.model_file)
+        with open(self.rewards_file, 'wb') as f:
             pickle.dump(self.rewards, f)
             
            
