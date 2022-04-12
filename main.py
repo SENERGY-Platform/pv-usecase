@@ -45,7 +45,13 @@ if __name__ == '__main__':
     util.logger.debug(f"kafka producer config: {kafka_producer_config}")
     kafka_consumer = confluent_kafka.Consumer(kafka_consumer_config, logger=util.logger)
     kafka_producer = confluent_kafka.Producer(kafka_producer_config, logger=util.logger)
-    operator = algo.Operator(energy_src_id=opr_config.config.energy_src_id, weather_src_id=opr_config.config.weather_src_id)
+    operator = algo.Operator(
+        energy_src_id=opr_config.config.energy_src_id,
+        weather_src_id=opr_config.config.weather_src_id,
+        history_power_td=opr_config.config.history_power_td,
+        weather_dim=opr_config.config.weather_dim,
+        data_path=opr_config.config.data_path
+    )
     operator.init(
         kafka_consumer=kafka_consumer,
         kafka_producer=kafka_producer,
