@@ -32,7 +32,9 @@ import torch.optim as optim
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id):
+    def __init__(self, energy_src_id, weather_src_id, history_power_td, weather_dim, data_path):
+        if not os.path.exists(data_path):
+            os.mkdir(data_path)
         self.energy_src_id = energy_src_id
         self.weather_src_id = weather_src_id
 
