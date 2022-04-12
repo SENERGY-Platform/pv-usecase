@@ -100,7 +100,7 @@ class Operator(util.OperatorBase):
 
     def run(self, data, selector):
 
-        if selector['name'] == 'weather_func':
+        if selector == 'weather_func':
             if self.weather_same_timestamp != []:
                 if data['time'] == self.weather_same_time_stamp[-1]['time']:
                     self.weather_same_timestamp.append(data)
@@ -109,5 +109,5 @@ class Operator(util.OperatorBase):
                     self.weather_same_timestamp = []
                     output = self.run_new_weather(new_weather_data)
                     return output
-        elif selector['name'] == 'power_func':
+        elif selector == 'power_func':
             self.run_new_power()
