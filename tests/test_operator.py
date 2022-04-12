@@ -51,7 +51,7 @@ class TestOperator(unittest.TestCase):
                 for line in file:
                     results = operator._OperatorBase__call_run(json.loads(line.strip()))
                     for result in results:
-                        pass
+                        print(result)
         except FileNotFoundError as ex:
             self.skipTest(ex)
 
