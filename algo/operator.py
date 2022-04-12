@@ -17,23 +17,16 @@
 __all__ = ("Operator", )
 
 import util
-import Agent
-import aux_functions
-
+from . import aux_functions, Agent
 from collections import deque
-
 import pickle
-
-import numpy as np
-
 import torch
 import torch.optim as optim
 import os
 
 
-
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id, history_power_td, weather_dim, data_path):
+    def __init__(self, energy_src_id, weather_src_id, history_power_td=60000, weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
         self.energy_src_id = energy_src_id
@@ -45,15 +38,12 @@ class Operator(util.OperatorBase):
         self.power_history = deque(maxlen=history_power_td) # For history_power_td=60000 the power history of the ~7 days is stored.
         
         self.agents = deque(maxlen=4)
-        self.policy = Agent.policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
+        self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
         self.optimizer = optim.Adam(self.policy.parameters(), lr=1e-2)
 
         self.rewards = []
         self.rewards_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_rewards.pickle'
         self.model_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_model.pt'
-
-
-
 
     def run_new_weather(self, new_weather_data):
         new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
@@ -64,7 +54,6 @@ class Operator(util.OperatorBase):
             output = self.policy(input)
         self.policy.train()
 
-    
         if len(self.agents) < 4:
             self.agents.append(Agent.Agent())
         elif len(self.agents) == 4:
@@ -82,8 +71,7 @@ class Operator(util.OperatorBase):
         torch.save(self.policy.state_dict(), self.model_file)
         with open(self.rewards_file, 'wb') as f:
             pickle.dump(self.rewards, f)
-            
-           
+
         newest_agent = self.agents[-1]
         newest_agent.save_weather_data(new_weather_array)
         newest_agent.act(self.policy)
@@ -93,7 +81,7 @@ class Operator(util.OperatorBase):
     def run_new_power(self, new_power_data):
         new_power_value = aux_functions.preprocess_power_data(new_power_data)
 
-        self.history_power.append(new_power_value)
+        self.power_history.append(new_power_value)
 
         for agent in self.agents:
             agent.update_power_list(new_power_value)
@@ -102,7 +90,7 @@ class Operator(util.OperatorBase):
 
         if selector == 'weather_func':
             if self.weather_same_timestamp != []:
-                if data['time'] == self.weather_same_time_stamp[-1]['time']:
+                if data['time'] == self.weather_same_timestamp[-1]['time']:
                     self.weather_same_timestamp.append(data)
                 elif data['time'] != self.weather_same_timestamp[-1]['time']:
                     new_weather_data = self.weather_same_timestamp
