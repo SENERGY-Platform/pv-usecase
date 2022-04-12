@@ -36,7 +36,7 @@ class Config(simple_struct.Structure):
     logger_level = "warning"
     history_power_td = 60000
     weather_dim = 6
-    data_path = "data"
+    data_path = "/opt/data"
     selectors: typing.List[Selector] = None
 
     def __init__(self, d, **kwargs):
