@@ -20,6 +20,7 @@ import util
 from . import aux_functions, Agent
 from collections import deque
 import pickle
+import numpy as np
 import torch
 import torch.optim as optim
 import os
@@ -47,10 +48,11 @@ class Operator(util.OperatorBase):
 
     def run_new_weather(self, new_weather_data):
         new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
+        new_weather_input = np.mean(new_weather_array, axis=0)
 
         self.policy.eval()      # The current policy is used for prediction.
         with torch.no_grad():
-            input = torch.Tensor(new_weather_array)
+            input = torch.Tensor(new_weather_input)
             output = self.policy(input)
         self.policy.train()
 
@@ -73,7 +75,7 @@ class Operator(util.OperatorBase):
             pickle.dump(self.rewards, f)
 
         newest_agent = self.agents[-1]
-        newest_agent.save_weather_data(new_weather_array)
+        newest_agent.save_weather_data(new_weather_input)
         newest_agent.act(self.policy)
     
         return output
@@ -98,4 +100,4 @@ class Operator(util.OperatorBase):
                     output = self.run_new_weather(new_weather_data)
                     return output
         elif selector == 'power_func':
-            self.run_new_power()
+            self.run_new_power(data)

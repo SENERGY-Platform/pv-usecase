@@ -15,7 +15,7 @@ class Policy(nn.Module):
         super().__init__()
 
         self.fc1 = nn.Linear(state_size, 16)
-        nn.init.kaiming_normal_(self.fc1, nonlinearity='relu')
+        nn.init.kaiming_normal_(self.fc1.weight, nonlinearity='relu')
         
         self.fc2 = nn.Linear(16, 2)
         nn.init.xavier_normal_(self.fc2.weight)
