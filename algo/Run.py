@@ -56,7 +56,7 @@ def run_new_weather(new_weather_data):
         agent.learn(agent.reward, agent.log_prob, optimizer)
     
     torch.save(policy.state_dict(), data_path+'/policy.pt')
-    with open(data_path+'rewards.pickle', 'wb') as f:
+    with open(data_path+'/rewards.pickle', 'wb') as f:
         pickle.dump(rewards, f)
             
            
@@ -68,16 +68,12 @@ def run_new_weather(new_weather_data):
 
 # The global variables get initialized. "rewards" can be saved on disk. All other variables have to be kept in memory.
 
-agents, history_power, policy, optimizer, rewards, use_cuda, history_time_delta = init_algo() 
-
-
-NEW_POWER_STATUS = bool
-NEW_WEATHER_STATUS = bool
+agents, policy, optimizer, history_power, replay_buffer, rewards, data_path = init_algo() 
 
 if NEW_POWER_STATUS: # As often as possible
-    run_new_power()
+    run_new_power(new_power_data)
 
-if NEW_WEATHER_STATUS: # Every 15min/30min
-    proposed_action = run_new_weather()
+if NEW_WEATHER_STATUS: # Every 30min
+    proposed_action = run_new_weather(new_weather_data)
 
 
