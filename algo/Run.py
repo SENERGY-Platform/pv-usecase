@@ -1,39 +1,24 @@
 import Agent
 import aux_functions
-
 from collections import deque
-
 import pickle
-
 import numpy as np
-
 import torch
 import torch.optim as optim
 
-
-
-
-
-def init_algo():             # This function initializes all global variables of the algorithm.
-    agents = deque(maxlen=8) # This list will contain the 8 agents that will learn in parallel.
-
-    history_power = []       # This list will contain the power values from the last 1/2/4 weeks.
-
-    policy = Agent.Policy(state_size=8)        # The policy that has to be learned.
+def init_algo(history_power_td=60000, weather_dim=6,data_path):             # This function initializes all global variables of the algorithm.
+    agents = deque(maxlen=4) # This list will contain the 4 agents that will learn in parallel.
+    policy = Agent.Policy(state_size=weather_dim)        # The policy that has to be learned.
     optimizer = optim.Adam(policy.parameters(), lr=1e-2)
+
+    history_power = deque(maxlen=history_power_td)      # This list will contain the power values from the last 1/2/4 weeks.
+    replay_buffer = deque(maxlen=50)                    
 
     rewards = []             # This list tracks all rewards given to all of the agents.
 
-    use_cuda = False
-    if torch.cuda.is_available():
-        use_cuda = True
-    
-    if use_cuda:
-        policy = policy.cuda()
+    data_path = data_path
 
-    history_time_delta = None # The time delta over which all power values are saved to compute the power threshold. 
-
-    return agents, history_power, policy, optimizer, rewards, use_cuda, history_time_delta
+    return agents, policy, optimizer, history_power, replay_buffer, rewards, data_path
 
 
 def run_new_power(new_power): # This function is run after a new solar power value is input.
