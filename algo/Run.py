@@ -50,10 +50,7 @@ def run_new_weather(new_weather_data):
         oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean=sum(history_power)/len(history_power))
         oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, optimizer)
             
-    replay_buffer.append(agents[-1])
-
-    for agent in replay_buffer:
-        agent.learn(agent.reward, agent.log_prob, optimizer)
+    
     
     torch.save(policy.state_dict(), data_path+'/policy.pt')
     with open(data_path+'/rewards.pickle', 'wb') as f:
