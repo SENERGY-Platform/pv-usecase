@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 
-def init_algo(history_power_td=60000, weather_dim=6,data_path):
+def init_algo(data_path, history_power_td=60000, weather_dim=6):
     agents = deque(maxlen=4) 
     policy = Agent.Policy(state_size=weather_dim)        
     optimizer = optim.Adam(policy.parameters(), lr=1e-2)
@@ -50,6 +50,11 @@ def run_new_weather(new_weather_data):
         oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean=sum(history_power)/len(history_power))
         oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, optimizer)
             
+    replay_buffer.append(agents[-1])
+
+    for agent in replay_buffer:
+        agent.learn(agent.reward, agent.log_prob, optimizer)
+    
     torch.save(policy.state_dict(), data_path+'/policy.pt')
     with open(data_path+'rewards.pickle', 'wb') as f:
         pickle.dump(rewards, f)
