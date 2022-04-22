@@ -6,27 +6,28 @@ import numpy as np
 import torch
 import torch.optim as optim
 
-def init_algo(history_power_td=60000, weather_dim=6,data_path):             # This function initializes all global variables of the algorithm.
-    agents = deque(maxlen=4) # This list will contain the 4 agents that will learn in parallel.
-    policy = Agent.Policy(state_size=weather_dim)        # The policy that has to be learned.
+def init_algo(history_power_td=60000, weather_dim=6,data_path):
+    agents = deque(maxlen=4) 
+    policy = Agent.Policy(state_size=weather_dim)        
     optimizer = optim.Adam(policy.parameters(), lr=1e-2)
 
-    history_power = deque(maxlen=history_power_td)      # This list will contain the power values from the last 1/2/4 weeks.
+    history_power = deque(maxlen=history_power_td)      
     replay_buffer = deque(maxlen=50)                    
 
-    rewards = []             # This list tracks all rewards given to all of the agents.
+    rewards = []
 
     data_path = data_path
 
     return agents, policy, optimizer, history_power, replay_buffer, rewards, data_path
 
 
-def run_new_power(new_power): # This function is run after a new solar power value is input.
-    #new_power = aux_functions.load_power_data()
-    history_power = aux_functions.update_history_power(history_power, new_power, history_time_delta) # Update the power history from the last 1/2/4 weeks.
+def run_new_power(new_power_data): 
+    new_power_value = aux_functions.preprocess_power_data(new_power_data)
+
+    history_power.append(new_power_value)
         
     for agent in agents:
-        agent.update_power_list(new_power) # Update the power list for every agent. (The power list of an agent is used for computation of the reward.)
+        agent.update_power_list(new_power_value) 
 
 
 def run_new_weather(new_weather_data): # This function is run after a new weather data point is input; i.e. once each 15min/30min.
