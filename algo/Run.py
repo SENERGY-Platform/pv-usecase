@@ -30,34 +30,33 @@ def run_new_power(new_power_data):
         agent.update_power_list(new_power_value) 
 
 
-def run_new_weather(new_weather_data): # This function is run after a new weather data point is input; i.e. once each 15min/30min.
+def run_new_weather(new_weather_data):
+    new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
+    new_weather_input = np.mean(new_weather_array, axis=0) 
 
-    policy.eval()      # The current policy is used for prediction.
+    policy.eval()     
     with torch.no_grad():
-        input = torch.Tensor(new_weather_data)
-        if use_cuda:
-            input.cuda()
+        input = torch.Tensor(new_weather_input)
         output = policy(input)
     policy.train()
 
     
     if len(agents) < 4:
-        agents.append(Agent.Agent(use_cuda))
+        agents.append(Agent.Agent())
     elif len(agents) == 4:
         oldest_agent = agents.popleft()
-        agents.append(Agent.Agent(use_cuda))
+        agents.append(Agent.Agent())
         oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(policy)
         oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean=sum(history_power)/len(history_power))
         oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, optimizer)
-        del oldest_agent
             
-    torch.save(policy.state_dict(), 'policy.pt')
-    with open('rewards.pickle', 'wb') as f:
+    torch.save(policy.state_dict(), data_path+'/policy.pt')
+    with open(data_path+'rewards.pickle', 'wb') as f:
         pickle.dump(rewards, f)
             
            
     newest_agent = agents[-1]
-    newest_agent.save_weather_data(new_weather)
+    newest_agent.save_weather_data(new_weather_input)
     newest_agent.act(policy)
     
     return output
