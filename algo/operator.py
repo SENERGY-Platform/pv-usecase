@@ -89,7 +89,7 @@ class Operator(util.OperatorBase):
             agent.update_power_list(new_power_value)
 
     def run(self, data, selector):
-        if os.getenv("DEBUG") is not None and os.getenv("DEBUG").lower() is "true":
+        if os.getenv("DEBUG") is not None and os.getenv("DEBUG").lower() == "true":
             print(selector + ": " + str(data))
         if selector == 'weather_func':
             if self.weather_same_timestamp != []:
