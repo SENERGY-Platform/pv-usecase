@@ -99,5 +99,7 @@ class Operator(util.OperatorBase):
                     self.weather_same_timestamp = []
                     output = self.run_new_weather(new_weather_data)
                     return output
+            elif self.weather_same_timestamp == []:
+                self.weather_same_timestamp.append(data)
         elif selector == 'power_func':
             self.run_new_power(data)
