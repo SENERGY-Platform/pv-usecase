@@ -89,12 +89,11 @@ class Operator(util.OperatorBase):
             agent.update_power_list(new_power_value)
 
     def run(self, data, selector):
-
         if selector == 'weather_func':
             if self.weather_same_timestamp != []:
-                if data['time'] == self.weather_same_timestamp[-1]['time']:
+                if data['weather_time'] == self.weather_same_timestamp[-1]['weather_time']:
                     self.weather_same_timestamp.append(data)
-                elif data['time'] != self.weather_same_timestamp[-1]['time']:
+                elif data['weather_time'] != self.weather_same_timestamp[-1]['weather_time']:
                     new_weather_data = self.weather_same_timestamp
                     self.weather_same_timestamp = []
                     output = self.run_new_weather(new_weather_data)
