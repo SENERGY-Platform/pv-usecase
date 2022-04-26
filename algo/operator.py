@@ -64,7 +64,7 @@ class Operator(util.OperatorBase):
             oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
             oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
             oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, self.optimizer)
-            
+            self.rewards.append(oldest_agent.reward)
             self.replay_buffer.append(self.agents[-1])
 
         for agent in self.replay_buffer:
