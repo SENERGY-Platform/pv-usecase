@@ -98,8 +98,8 @@ class Operator(util.OperatorBase):
                     self.weather_same_timestamp.append(data)
                 elif data['weather_time'] != self.weather_same_timestamp[-1]['weather_time']:
                     new_weather_data = self.weather_same_timestamp
-                    self.weather_same_timestamp = []
                     output = self.run_new_weather(new_weather_data)
+                    self.weather_same_timestamp = [data] 
                     return output
             elif self.weather_same_timestamp == []:
                 self.weather_same_timestamp.append(data)
