@@ -88,6 +88,13 @@ class Operator(util.OperatorBase):
             agent.learn(agent.reward, agent.log_prob, self.optimizer)
             
         torch.save(self.policy.state_dict(), self.model_file)
+        
+        with open(self.power_history_means_file, 'wb') as f:
+            pickle.dump(self.power_history_means, f)
+        with open(self.power_lists_file, 'wb') as f:
+            pickle.dump(self.power_lists, f)
+        with open(self.actions_file, 'wb') as f:
+            pickle.dump(self.actions, f)
         with open(self.rewards_file, 'wb') as f:
             pickle.dump(self.rewards, f)
 
