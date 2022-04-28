@@ -42,8 +42,16 @@ class Operator(util.OperatorBase):
         self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
         self.optimizer = optim.Adam(self.policy.parameters(), lr=1e-2)
 
+        self.power_history_means = []
+        self.power_lists = []
+        self.actions = []
         self.rewards = []
+
+        self.power_history_means_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_power_history_means.pickle'
+        self.power_lists_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_power_lists.pickle'
+        self.actions_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_actions.pickle'
         self.rewards_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_rewards.pickle'
+
         self.model_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_model.pt'
 
     def run_new_weather(self, new_weather_data):
@@ -64,6 +72,10 @@ class Operator(util.OperatorBase):
             oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
             oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
             oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, self.optimizer)
+
+            self.power_history_means.append(sum(self.power_history)/len(self.power_history))
+            self.power_lists.append(oldest_agent.power_list)
+            self.actions.append(oldest_agent.action)
             self.rewards.append(oldest_agent.reward)
             self.replay_buffer.append(oldest_agent)
 
