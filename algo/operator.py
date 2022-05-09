@@ -66,7 +66,7 @@ class Operator(util.OperatorBase):
 
         self.policy.eval()      # The current policy is used for prediction.
         with torch.no_grad():
-            input = torch.Tensor(new_weather_input)
+            input = torch.from_numpy(new_weather_input).float().unsqueeze(0)
             output = torch.argmax(self.policy(input)).item()
         self.policy.train()
 
