@@ -46,11 +46,13 @@ class Operator(util.OperatorBase):
         self.power_lists = []
         self.actions = []
         self.rewards = []
+        self.weather_data = []
 
         self.power_history_means_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_power_history_means.pickle'
         self.power_lists_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_power_lists.pickle'
         self.actions_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_actions.pickle'
         self.rewards_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_rewards.pickle'
+        self.weather_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_weather.pickle'
 
         self.model_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_model.pt'
 
@@ -59,6 +61,7 @@ class Operator(util.OperatorBase):
 
     def run_new_weather(self, new_weather_data):
         new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
+        self.weather_data.append(new_weather_array)
         new_weather_input = np.mean(new_weather_array, axis=0)
 
         self.policy.eval()      # The current policy is used for prediction.
@@ -97,6 +100,8 @@ class Operator(util.OperatorBase):
             pickle.dump(self.actions, f)
         with open(self.rewards_file, 'wb') as f:
             pickle.dump(self.rewards, f)
+        with open(self.weather_file, 'wb') as f:
+            pickle.dump(self.weather_data, f)
 
         newest_agent = self.agents[-1]
         newest_agent.save_weather_data(new_weather_input)
