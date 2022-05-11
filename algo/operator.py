@@ -88,10 +88,11 @@ class Operator(util.OperatorBase):
             self.replay_buffer.append(oldest_agent)
 
         random.shuffle(self.replay_buffer)
-        for agent in self.replay_buffer:
-            agent.action, agent.log_prob = agent.act(self.policy)
-            agent.reward = agent.get_reward(agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
-            agent.learn(agent.reward, agent.log_prob, self.optimizer)
+        if len(self.replay_buffer)==48:
+            for agent in self.replay_buffer:
+                agent.action, agent.log_prob = agent.act(self.policy)
+                agent.reward = agent.get_reward(agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
+                agent.learn(agent.reward, agent.log_prob, self.optimizer)
             
         torch.save(self.policy.state_dict(), self.model_file)
         
