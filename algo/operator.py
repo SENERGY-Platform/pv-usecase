@@ -87,7 +87,7 @@ class Operator(util.OperatorBase):
             self.rewards.append(oldest_agent.reward)
             self.replay_buffer.append(oldest_agent)
 
-        
+        random.shuffle(self.replay_buffer)
         for agent in self.replay_buffer:
             agent.action, agent.log_prob = agent.act(self.policy)
             agent.reward = agent.get_reward(agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
