@@ -24,6 +24,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 import os
+import random
 
 
 class Operator(util.OperatorBase):
@@ -75,9 +76,10 @@ class Operator(util.OperatorBase):
         elif len(self.agents) == 4:
             oldest_agent = self.agents.popleft()
             self.agents.append(Agent.Agent())
-            oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
-            oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
-            oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, self.optimizer)
+            if len(self.replay_buffer)==48:
+                oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
+                oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
+                oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, self.optimizer)
 
             self.power_history_means.append(sum(self.power_history)/len(self.power_history))
             self.power_lists.append(oldest_agent.power_list)
@@ -85,6 +87,7 @@ class Operator(util.OperatorBase):
             self.rewards.append(oldest_agent.reward)
             self.replay_buffer.append(oldest_agent)
 
+        
         for agent in self.replay_buffer:
             agent.action, agent.log_prob = agent.act(self.policy)
             agent.reward = agent.get_reward(agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
