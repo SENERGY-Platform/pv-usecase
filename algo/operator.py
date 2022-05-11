@@ -57,8 +57,8 @@ class Operator(util.OperatorBase):
 
         self.model_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_model.pt'
 
-        if os.path.exists(self.model_file):
-            self.policy.load_state_dict(torch.load(self.model_file))
+        #if os.path.exists(self.model_file):
+        #    self.policy.load_state_dict(torch.load(self.model_file))
 
     def run_new_weather(self, new_weather_data):
         new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
