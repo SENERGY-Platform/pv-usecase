@@ -75,8 +75,6 @@ class Operator(util.OperatorBase):
             self.agents.append(Agent.Agent())
         elif len(self.agents) == 4:
             oldest_agent = self.agents.popleft()
-            self.replay_buffer.append(oldest_agent)
-            
             self.agents.append(Agent.Agent())
             if len(self.replay_buffer)==48:
                 random.shuffle(self.replay_buffer)
@@ -93,7 +91,7 @@ class Operator(util.OperatorBase):
                 self.power_lists.append(oldest_agent.power_list)
                 self.actions.append(oldest_agent.action)
                 self.rewards.append(oldest_agent.reward)
-                
+            self.replay_buffer.append(oldest_agent)    
             
         torch.save(self.policy.state_dict(), self.model_file)
         
