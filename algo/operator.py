@@ -81,11 +81,11 @@ class Operator(util.OperatorBase):
                 oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
                 oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, self.optimizer)
 
-            self.power_history_means.append(sum(self.power_history)/len(self.power_history))
-            self.power_lists.append(oldest_agent.power_list)
-            self.actions.append(oldest_agent.action)
-            self.rewards.append(oldest_agent.reward)
-            self.replay_buffer.append(oldest_agent)
+                self.power_history_means.append(sum(self.power_history)/len(self.power_history))
+                self.power_lists.append(oldest_agent.power_list)
+                self.actions.append(oldest_agent.action)
+                self.rewards.append(oldest_agent.reward)
+                self.replay_buffer.append(oldest_agent)
 
         random.shuffle(self.replay_buffer)
         if len(self.replay_buffer)==48:
