@@ -35,7 +35,7 @@ class Operator(util.OperatorBase):
 
         self.weather_same_timestamp = []
 
-        self.replay_buffer = deque(maxlen=50)
+        self.replay_buffer = deque(maxlen=48)
         self.power_history = deque(maxlen=history_power_td) # For history_power_td=60000 the power history of the ~7 days is stored.
         
         self.agents = deque(maxlen=4)
