@@ -50,7 +50,8 @@ if __name__ == '__main__':
         weather_src_id=opr_config.config.weather_src_id,
         history_power_td=opr_config.config.history_power_td,
         weather_dim=opr_config.config.weather_dim,
-        data_path=opr_config.config.data_path
+        data_path=opr_config.config.data_path,
+        buffer_len=opr_config.config.buffer_len
     )
     operator.init(
         kafka_consumer=kafka_consumer,

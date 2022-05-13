@@ -38,6 +38,7 @@ class Config(simple_struct.Structure):
     weather_dim = 6
     data_path = "/opt/data"
     selectors: typing.List[Selector] = None
+    buffer_len = 48
 
     def __init__(self, d, **kwargs):
         super().__init__(d, **kwargs)

@@ -28,7 +28,7 @@ import random
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id, history_power_td=60000, weather_dim=6, data_path="data"):
+    def __init__(self, energy_src_id, buffer_len, weather_src_id, history_power_td=60000, weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
         self.energy_src_id = energy_src_id
@@ -36,7 +36,8 @@ class Operator(util.OperatorBase):
 
         self.weather_same_timestamp = []
 
-        self.replay_buffer = deque(maxlen=48)
+        self.buffer_len = buffer_len
+        self.replay_buffer = deque(maxlen=self.buffer_len)
         self.power_history = deque(maxlen=history_power_td) # For history_power_td=60000 the power history of the ~7 days is stored.
         
         self.agents = deque(maxlen=4)
@@ -76,7 +77,7 @@ class Operator(util.OperatorBase):
         elif len(self.agents) == 4:
             oldest_agent = self.agents.popleft()
             self.agents.append(Agent.Agent())
-            if len(self.replay_buffer)==48:
+            if len(self.replay_buffer)==self.buffer_len:
                 random.shuffle(self.replay_buffer)
                 for agent in self.replay_buffer:
                     agent.action, agent.log_prob = agent.act(self.policy)
