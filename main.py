@@ -52,8 +52,8 @@ if __name__ == '__main__':
         weather_dim=opr_config.config.weather_dim,
         data_path=opr_config.config.data_path,
         buffer_len=opr_config.config.buffer_len,
-        buffer_len=opr_config.config.p_1,
-        buffer_len=opr_config.config.p_0,
+        p_1=opr_config.config.p_1,
+        p_0=opr_config.config.p_0,
         history_modus=opr_config.config.history_modus
     )
     operator.init(
