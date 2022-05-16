@@ -28,9 +28,12 @@ import random
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, buffer_len, weather_src_id, history_power_td=60000, weather_dim=6, data_path="data"):
+    def __init__(self, energy_src_id, weather_src_id, buffer_len, observer, history_power_td=60000, weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
+
+        self.observer = observer
+        
         self.energy_src_id = energy_src_id
         self.weather_src_id = weather_src_id
 
