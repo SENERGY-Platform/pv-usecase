@@ -5,7 +5,7 @@ def preprocess_power_data(new_power_data):
 
     time = new_power_data['energy_time']
     power = new_power_data['energy']
-    return power
+    return time, power
 
 
 def preprocess_weather_data(new_weather_data):
