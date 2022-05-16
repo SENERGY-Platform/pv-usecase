@@ -30,7 +30,7 @@ from astral import sun
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id, history_power_td=60000, weather_dim=6, data_path="data", buffer_len=48, p_1=1, p_0=1, history_modus='daylight'):
+    def __init__(self, energy_src_id, weather_src_id, buffer_len, p_1, p_0, history_modus, history_power_td=60000, weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
 
@@ -42,7 +42,7 @@ class Operator(util.OperatorBase):
         self.weather_same_timestamp = []
 
         self.buffer_len = buffer_len
-        self.replay_buffer = deque(maxlen=buffer_len)
+        self.replay_buffer = deque(maxlen=self.buffer_len)
         self.power_history = deque(maxlen=history_power_td) # For history_power_td=60000 the power history of the ~7 days is stored.
         self.daylight_power_history = deque(maxlen=history_power_td/2)
         self.history_modus = history_modus
