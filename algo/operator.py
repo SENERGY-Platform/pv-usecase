@@ -114,6 +114,7 @@ class Operator(util.OperatorBase):
 
         newest_agent = self.agents[-1]
         newest_agent.save_weather_data(new_weather_input)
+        newest_agent.observer = self.observer
     
         return output
 
