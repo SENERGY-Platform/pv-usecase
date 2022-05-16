@@ -42,7 +42,7 @@ class Operator(util.OperatorBase):
         self.weather_same_timestamp = []
 
         self.buffer_len = buffer_len
-        self.replay_buffer = deque(maxlen=self.buffer_len)
+        self.replay_buffer = deque(maxlen=buffer_len)
         self.power_history = deque(maxlen=history_power_td) # For history_power_td=60000 the power history of the ~7 days is stored.
         self.daylight_power_history = deque(maxlen=history_power_td/2)
         self.history_modus = history_modus
