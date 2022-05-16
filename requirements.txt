@@ -7,3 +7,4 @@ pandas<2
 kazoo<3
 astral
 datetime
+pytz
