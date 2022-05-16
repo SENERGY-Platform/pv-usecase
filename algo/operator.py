@@ -30,11 +30,11 @@ from astral import sun
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id, history_modus, p_1, p_0, buffer_len=48, coordinates=(51.34, 12.38), history_power_td=60000, weather_dim=6, data_path="data"):
+    def __init__(self, energy_src_id, weather_src_id, history_modus, p_1, p_0, buffer_len, history_power_td=60000, weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
 
-        self.observer = astral.Observer(latitude=coordinates[0], longitude=coordinates[1])
+        self.observer = astral.Observer(latitude=51.34, longitude=12.38)
 
         self.energy_src_id = energy_src_id
         self.weather_src_id = weather_src_id
