@@ -5,3 +5,5 @@ git+https://github.com/SENERGY-Platform/concurrency-watchdog.git@0.1.1
 confluent_kafka<2
 pandas<2
 kazoo<3
+astral
+datetime
