@@ -30,7 +30,7 @@ from astral import sun
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id, history_modus, p_1, p_0, buffer_len, history_power_td=60000, weather_dim=6, data_path="data"):
+    def __init__(self, energy_src_id, weather_src_id, history_power_td=60000, weather_dim=6, data_path="data", buffer_len=48, p_1=1, p_0=1, history_modus='daylight'):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
 
