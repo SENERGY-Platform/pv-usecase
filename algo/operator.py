@@ -60,12 +60,12 @@ class Operator(util.OperatorBase):
         self.rewards = []
         self.weather_data = []
 
-        self.power_lists_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_power_lists.pickle'
-        self.actions_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_actions.pickle'
-        self.rewards_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_rewards.pickle'
-        self.weather_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_weather.pickle'
+        self.power_lists_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_power_lists_{p_1}_{p_0}_{history_modus}.pickle'
+        self.actions_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_actions_{p_1}_{p_0}_{history_modus}.pickle'
+        self.rewards_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_rewards_{p_1}_{p_0}_{history_modus}.pickle'
+        self.weather_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_weather_{p_1}_{p_0}_{history_modus}.pickle'
 
-        self.model_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_model.pt'
+        self.model_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_model_{p_1}_{p_0}_{history_modus}.pt'
 
         #if os.path.exists(self.model_file):
         #    self.policy.load_state_dict(torch.load(self.model_file))
