@@ -27,7 +27,6 @@ class Policy(nn.Module):
 class Agent:
     def __init__(self):
         self.initial_weather_data = None
-        self.observer = None
         self.power_list = []
         self.action = None
         self.log_prob = None
