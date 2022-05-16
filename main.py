@@ -51,7 +51,10 @@ if __name__ == '__main__':
         history_power_td=opr_config.config.history_power_td,
         weather_dim=opr_config.config.weather_dim,
         data_path=opr_config.config.data_path,
-        buffer_len=opr_config.config.buffer_len
+        buffer_len=opr_config.config.buffer_len,
+        buffer_len=opr_config.config.p_1,
+        buffer_len=opr_config.config.p_0,
+        history_modus=opr_config.config.history_modus
     )
     operator.init(
         kafka_consumer=kafka_consumer,
