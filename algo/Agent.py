@@ -47,13 +47,14 @@ class Agent:
         log_prob = m.log_prob(action)
         return  action, log_prob
     
-    def get_reward(self, action, history_power_mean):
+    def get_reward(self, action, p_1, p_0, history):
         agents_power_mean = sum(self.power_list)/len(self.power_list)
+        history_mean = sum(history)/len(history)
         
         if action.item()==1:    # 'YES'
-            reward = agents_power_mean-history_power_mean
+            reward = (agents_power_mean-history_mean)**p_1
         elif action.item()==0:  # 'NO'
-            reward = history_power_mean-agents_power_mean
+            reward = (history_mean-agents_power_mean)**p_0
             
         return reward
     

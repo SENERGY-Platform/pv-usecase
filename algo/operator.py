@@ -30,7 +30,7 @@ from astral import sun
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id, buffer_len, coordinates=(51.34, 12.38), history_power_td=60000, weather_dim=6, data_path="data"):
+    def __init__(self, energy_src_id, weather_src_id, history_modus, p_1, p_0, buffer_len=48, coordinates=(51.34, 12.38), history_power_td=60000, weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
 
@@ -45,6 +45,10 @@ class Operator(util.OperatorBase):
         self.replay_buffer = deque(maxlen=self.buffer_len)
         self.power_history = deque(maxlen=history_power_td) # For history_power_td=60000 the power history of the ~7 days is stored.
         self.daylight_power_history = deque(maxlen=history_power_td/2)
+        self.history_modus = history_modus
+
+        self.p_1 = p_1
+        self.p_0 = p_0
         
         self.agents = deque(maxlen=4)
         self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
@@ -56,7 +60,6 @@ class Operator(util.OperatorBase):
         self.rewards = []
         self.weather_data = []
 
-        self.power_history_means_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_power_history_means.pickle'
         self.power_lists_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_power_lists.pickle'
         self.actions_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_actions.pickle'
         self.rewards_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_rewards.pickle'
@@ -87,14 +90,19 @@ class Operator(util.OperatorBase):
                 random.shuffle(self.replay_buffer)
                 for agent in self.replay_buffer:
                     agent.action, agent.log_prob = agent.act(self.policy)
-                    agent.reward = agent.get_reward(agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
+                    if self.history_modus=='all':
+                        agent.reward = agent.get_reward(agent.action, self.p_1, self.p_0, self.power_history)
+                    elif self.history_modus=='daylight':
+                        agent.reward = agent.get_reward(agent.action, self.p_1, self.p_0, self.daylight_power_history)
                     agent.learn(agent.reward, agent.log_prob, self.optimizer)
 
                 oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
-                oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, history_power_mean=sum(self.power_history)/len(self.power_history))
+                if self.history_modus=='all':
+                    oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, self.p_1, self.p_0, self.power_history)
+                elif self.history_modus=='daylight':
+                    oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, self.p_1, self.p_0, self.daylight_power_history)
                 oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, self.optimizer)
 
-                self.power_history_means.append(sum(self.power_history)/len(self.power_history))
                 self.power_lists.append(oldest_agent.power_list)
                 self.actions.append(oldest_agent.action)
                 self.rewards.append(oldest_agent.reward)
@@ -115,7 +123,6 @@ class Operator(util.OperatorBase):
 
         newest_agent = self.agents[-1]
         newest_agent.save_weather_data(new_weather_input)
-        newest_agent.observer = self.observer
     
         return output
 
