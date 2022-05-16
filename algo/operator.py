@@ -44,6 +44,7 @@ class Operator(util.OperatorBase):
         self.buffer_len = buffer_len
         self.replay_buffer = deque(maxlen=self.buffer_len)
         self.power_history = deque(maxlen=history_power_td) # For history_power_td=60000 the power history of the ~7 days is stored.
+        self.daylight_power_history = deque(maxlen=history_power_td/2)
         
         self.agents = deque(maxlen=4)
         self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
@@ -125,6 +126,11 @@ class Operator(util.OperatorBase):
 
         for agent in self.agents:
             agent.update_power_list(new_power_value)
+
+        sunrise = sun.sunrise(self.observer, date=time, tzinfo='Europe/Berlin')
+        sunset = sun.sunrise(self.observer, date=time, tzinfo='Europe/Berlin') 
+        if (sunrise<time) and (time<sunset):
+            self.daylight_power_history.append(new_power_value)
 
     def run(self, data, selector):
         if os.getenv("DEBUG") is not None and os.getenv("DEBUG").lower() == "true":
