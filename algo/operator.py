@@ -25,15 +25,17 @@ import torch
 import torch.optim as optim
 import os
 import random
+import astral
+from astral import sun
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id, buffer_len, observer, history_power_td=60000, weather_dim=6, data_path="data"):
+    def __init__(self, energy_src_id, weather_src_id, buffer_len, coordinates=(51.34, 12.38), history_power_td=60000, weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
 
-        self.observer = observer
-        
+        self.observer = astral.Observer(latitude=coordinates[0], longitude=coordinates[1])
+
         self.energy_src_id = energy_src_id
         self.weather_src_id = weather_src_id
 
