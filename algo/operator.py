@@ -113,9 +113,9 @@ class Operator(util.OperatorBase):
         return output
 
     def run_new_power(self, new_power_data):
-        new_power_value = aux_functions.preprocess_power_data(new_power_data)
+        time, new_power_value = aux_functions.preprocess_power_data(new_power_data)
 
-        self.power_history.append(new_power_value)
+        self.power_history.append((time, new_power_value))
 
         for agent in self.agents:
             agent.update_power_list(new_power_value)
