@@ -38,10 +38,10 @@ class Config(simple_struct.Structure):
     weather_dim = 6
     data_path = "/opt/data"
     selectors: typing.List[Selector] = None
-    buffer_len: int = 48
-    p_1: int = 1
-    p_0: int = 1
-    history_modus: str = 'daylight'
+    buffer_len = 48
+    p_1 = 1
+    p_0 = 1
+    history_modus = 'daylight'
 
     def __init__(self, d, **kwargs):
         super().__init__(d, **kwargs)
