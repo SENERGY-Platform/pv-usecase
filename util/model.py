@@ -39,8 +39,8 @@ class Config(simple_struct.Structure):
     data_path = "/opt/data"
     selectors: typing.List[Selector] = None
     buffer_len: str = None
-    p_1: int = None
-    p_0: int = None
+    p_1: str = None
+    p_0: str = None
     history_modus: str = None
 
     def __init__(self, d, **kwargs):
