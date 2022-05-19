@@ -34,7 +34,7 @@ class Config(simple_struct.Structure):
     energy_src_id: str = None
     weather_src_id: str = None
     logger_level = "warning"
-    history_power_td = 60000
+    power_td: str = None
     weather_dim = 6
     data_path = "/opt/data"
     selectors: typing.List[Selector] = None

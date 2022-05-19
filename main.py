@@ -52,7 +52,7 @@ if __name__ == '__main__':
         p_1=opr_config.config.p_1,
         p_0=opr_config.config.p_0,
         history_modus=opr_config.config.history_modus,
-        history_power_td=opr_config.config.history_power_td,
+        power_td=opr_config.config.power_td,
         weather_dim=opr_config.config.weather_dim,
         data_path=opr_config.config.data_path,
     )
