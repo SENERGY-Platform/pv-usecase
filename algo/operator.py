@@ -110,8 +110,6 @@ class Operator(util.OperatorBase):
             
         torch.save(self.policy.state_dict(), self.model_file)
         
-        #with open(self.power_history_means_file, 'wb') as f:
-            #pickle.dump(self.power_history_means, f)
         with open(self.power_lists_file, 'wb') as f:
             pickle.dump(self.power_lists, f)
         with open(self.actions_file, 'wb') as f:
