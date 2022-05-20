@@ -27,6 +27,8 @@ import os
 import random
 import astral
 from astral import sun
+import pytz
+import datetime
 
 
 class Operator(util.OperatorBase):
@@ -51,11 +53,10 @@ class Operator(util.OperatorBase):
         self.p_1 = int(p_1)
         self.p_0 = int(p_0)
         
-        self.agents = deque(maxlen=4)
+        self.agents = []
         self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
         self.optimizer = optim.Adam(self.policy.parameters(), lr=1e-2)
 
-        self.power_history_means = []
         self.power_lists = []
         self.actions = []
         self.rewards = []
@@ -82,46 +83,24 @@ class Operator(util.OperatorBase):
             output = torch.argmax(self.policy(input)).item()
         self.policy.train()
 
-        if len(self.agents) < 4:
-            self.agents.append(Agent.Agent())
-        elif len(self.agents) == 4:
-            oldest_agent = self.agents.popleft()
-            self.agents.append(Agent.Agent())
-            if len(self.replay_buffer)==self.buffer_len:
-                random.shuffle(self.replay_buffer)
-                for agent in self.replay_buffer:
-                    agent.action, agent.log_prob = agent.act(self.policy)
-                    if self.history_modus=='all':
-                        agent.reward = agent.get_reward(agent.action, self.p_1, self.p_0, self.power_history)
-                    elif self.history_modus=='daylight':
-                        agent.reward = agent.get_reward(agent.action, self.p_1, self.p_0, self.daylight_power_history)
-                    agent.learn(agent.reward, agent.log_prob, self.optimizer)
-
-                oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
+        self.agents.append(Agent.Agent())
+        if len(self.replay_buffer)==self.buffer_len:
+            random.shuffle(self.replay_buffer)
+            for agent in self.replay_buffer:
+                agent.action, agent.log_prob = agent.act(self.policy)
                 if self.history_modus=='all':
-                    oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, self.p_1, self.p_0, self.power_history)
+                    agent.reward = agent.get_reward(agent.action, self.p_1, self.p_0, self.power_history)
                 elif self.history_modus=='daylight':
-                    oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, self.p_1, self.p_0, self.daylight_power_history)
-                oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, self.optimizer)
+                    agent.reward = agent.get_reward(agent.action, self.p_1, self.p_0, self.daylight_power_history)
+                agent.learn(agent.reward, agent.log_prob, self.optimizer)
 
-                self.power_lists.append(oldest_agent.power_list)
-                self.actions.append(oldest_agent.action)
-                self.rewards.append(oldest_agent.reward)
-            self.replay_buffer.append(oldest_agent)    
-            
         torch.save(self.policy.state_dict(), self.model_file)
-        
-        with open(self.power_lists_file, 'wb') as f:
-            pickle.dump(self.power_lists, f)
-        with open(self.actions_file, 'wb') as f:
-            pickle.dump(self.actions, f)
-        with open(self.rewards_file, 'wb') as f:
-            pickle.dump(self.rewards, f)
         with open(self.weather_file, 'wb') as f:
             pickle.dump(self.weather_data, f)
-
+        
         newest_agent = self.agents[-1]
         newest_agent.save_weather_data(new_weather_input)
+        newest_agent.initial_time = pytz.timezone('Europe/Berlin').localize(datetime.datetime.strptime(new_weather_data[0]['weather_time'], '%Y-%m-%dT%H:%M:%SZ'))
     
         return output
 
@@ -130,13 +109,34 @@ class Operator(util.OperatorBase):
 
         self.power_history.append(new_power_value)
 
-        for agent in self.agents:
-            agent.update_power_list(new_power_value)
+        for i, agent in enumerate(self.agents):
+            if agent.initial_time + datetime.timedelta(hours=2) >= time:
+                agent.update_power_list(new_power_value)
+            elif agent.initial_time + datetime.timedelta(hours=2) < time:
+                oldest_agent = self.agents.pop(i)
+                if len(self.replay_buffer)==self.buffer_len:
+                    oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
+                    if self.history_modus=='all':
+                        oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, self.p_1, self.p_0, self.power_history)
+                    elif self.history_modus=='daylight':
+                        oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, self.p_1, self.p_0, self.daylight_power_history)
+                    oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, self.optimizer)
+                    self.power_lists.append(oldest_agent.power_list)
+                    self.actions.append(oldest_agent.action)
+                    self.rewards.append(oldest_agent.reward)
+                self.replay_buffer.append(oldest_agent) 
 
         sunrise = sun.sunrise(self.observer, date=time, tzinfo='Europe/Berlin')
         sunset = sun.sunrise(self.observer, date=time, tzinfo='Europe/Berlin') 
         if (sunrise<time) and (time<sunset):
             self.daylight_power_history.append(new_power_value)
+
+        with open(self.power_lists_file, 'wb') as f:
+            pickle.dump(self.power_lists, f)
+        with open(self.actions_file, 'wb') as f:
+            pickle.dump(self.actions, f)
+        with open(self.rewards_file, 'wb') as f:
+            pickle.dump(self.rewards, f)
 
     def run(self, data, selector):
         if os.getenv("DEBUG") is not None and os.getenv("DEBUG").lower() == "true":
