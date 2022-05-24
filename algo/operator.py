@@ -106,12 +106,13 @@ class Operator(util.OperatorBase):
 
     def run_new_power(self, new_power_data):
         time, new_power_value = aux_functions.preprocess_power_data(new_power_data)
-
-        self.power_history.append(new_power_value)
+        if new_power_value != None:
+            self.power_history.append(new_power_value)
 
         for i, agent in enumerate(self.agents):
             if agent.initial_time + datetime.timedelta(hours=2) >= time:
-                agent.update_power_list(new_power_value)
+                if new_power_value != None:
+                    agent.update_power_list(new_power_value)
             elif agent.initial_time + datetime.timedelta(hours=2) < time:
                 oldest_agent = self.agents.pop(i)
                 if len(self.replay_buffer)==self.buffer_len:
@@ -129,6 +130,7 @@ class Operator(util.OperatorBase):
         sunrise = sun.sunrise(self.observer, date=time, tzinfo='Europe/Berlin')
         sunset = sun.sunset(self.observer, date=time, tzinfo='Europe/Berlin') 
         if (sunrise<time) and (time<sunset):
+            if new_power_value != None:
             self.daylight_power_history.append(new_power_value)
 
         with open(self.power_lists_file, 'wb') as f:
