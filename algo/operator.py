@@ -131,7 +131,7 @@ class Operator(util.OperatorBase):
         sunset = sun.sunset(self.observer, date=time, tzinfo='Europe/Berlin') 
         if (sunrise<time) and (time<sunset):
             if new_power_value != None:
-            self.daylight_power_history.append(new_power_value)
+               self.daylight_power_history.append(new_power_value)
 
         with open(self.power_lists_file, 'wb') as f:
             pickle.dump(self.power_lists, f)
