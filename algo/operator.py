@@ -127,7 +127,7 @@ class Operator(util.OperatorBase):
                 self.replay_buffer.append(oldest_agent) 
 
         sunrise = sun.sunrise(self.observer, date=time, tzinfo='Europe/Berlin')
-        sunset = sun.sunrise(self.observer, date=time, tzinfo='Europe/Berlin') 
+        sunset = sun.sunset(self.observer, date=time, tzinfo='Europe/Berlin') 
         if (sunrise<time) and (time<sunset):
             self.daylight_power_history.append(new_power_value)
 
