@@ -48,6 +48,7 @@ if __name__ == '__main__':
     operator = algo.Operator(
         energy_src_id=opr_config.config.energy_src_id,
         weather_src_id=opr_config.config.weather_src_id,
+        power_history_start_stop=opr_config.config.power_history_start_stop,
         buffer_len=opr_config.config.buffer_len,
         p_1=opr_config.config.p_1,
         p_0=opr_config.config.p_0,

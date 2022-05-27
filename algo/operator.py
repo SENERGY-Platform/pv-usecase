@@ -32,7 +32,7 @@ import datetime
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id, buffer_len='48', p_1='1', p_0='1', history_modus='daylight', power_td=0.17, weather_dim=6, data_path="data"):
+    def __init__(self, energy_src_id, weather_src_id, power_history_start_stop=2, buffer_len='48', p_1='1', p_0='1', history_modus='daylight', power_td=0.17, weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
 
@@ -43,8 +43,10 @@ class Operator(util.OperatorBase):
 
         self.weather_same_timestamp = []
 
+        self.power_history_start_stop = int(power_history_start_stop)
+
         self.buffer_len = int(buffer_len)
-        self.history_power_len = int(10000/float(power_td)) # power_td is the time difference between two consecutive power values
+        self.history_power_len = int(10000/float(power_td)) # power_td is the time difference between two consecutive power values in minutes
         self.replay_buffer = deque(maxlen=self.buffer_len)
         self.power_history = deque(maxlen=self.history_power_len) 
         self.daylight_power_history = deque(maxlen=int(self.history_power_len/2))
@@ -129,7 +131,7 @@ class Operator(util.OperatorBase):
 
         sunrise = sun.sunrise(self.observer, date=time, tzinfo='UTC')
         sunset = sun.sunset(self.observer, date=time, tzinfo='UTC') 
-        if (sunrise<time) and (time<sunset):
+        if (sunrise+datetime.timedelta(hours=self.power_history_start_stop)<time) and (time+datetime.timedelta(hours=self.power_history_start_stop)<sunset):
             if new_power_value != None:
                self.daylight_power_history.append(new_power_value)
 

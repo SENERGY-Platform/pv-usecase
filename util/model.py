@@ -42,6 +42,7 @@ class Config(simple_struct.Structure):
     p_1: str = None
     p_0: str = None
     history_modus: str = None
+    power_history_start_stop: str = None
 
     def __init__(self, d, **kwargs):
         super().__init__(d, **kwargs)
