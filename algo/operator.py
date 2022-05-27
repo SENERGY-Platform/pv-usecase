@@ -117,7 +117,7 @@ class Operator(util.OperatorBase):
                     agent.update_power_list(new_power_value)
             elif agent.initial_time + datetime.timedelta(hours=2) < time:
                 oldest_agent = self.agents.pop(i)
-                if len(self.replay_buffer)==self.buffer_len:
+                if len(self.replay_buffer)==self.buffer_len and oldest_agent.power_list != []:
                     oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
                     if self.history_modus=='all':
                         oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, self.p_1, self.p_0, self.power_history)
@@ -127,7 +127,8 @@ class Operator(util.OperatorBase):
                     self.power_lists.append(oldest_agent.power_list)
                     self.actions.append(oldest_agent.action)
                     self.rewards.append(oldest_agent.reward)
-                self.replay_buffer.append(oldest_agent) 
+                if oldest_agent.power_list != []:
+                    self.replay_buffer.append(oldest_agent) 
 
         sunrise = sun.sunrise(self.observer, date=time, tzinfo='UTC')
         sunset = sun.sunset(self.observer, date=time, tzinfo='UTC') 
