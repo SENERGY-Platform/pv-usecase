@@ -4,7 +4,7 @@ import datetime
 import pytz
 
 def preprocess_power_data(new_power_data):
-    time=pytz.timezone('Europe/Berlin').localize(datetime.datetime.strptime(new_power_data['energy_time'], '%Y-%m-%dT%H:%M:%SZ'))
+    time=pytz.timezone('UTC').localize(datetime.datetime.strptime(new_power_data['energy_time'], '%Y-%m-%dT%H:%M:%SZ'))
     power = new_power_data['energy']
     return time, power
 

@@ -100,7 +100,7 @@ class Operator(util.OperatorBase):
         
         newest_agent = self.agents[-1]
         newest_agent.save_weather_data(new_weather_input)
-        newest_agent.initial_time = pytz.timezone('Europe/Berlin').localize(datetime.datetime.strptime(new_weather_data[0]['weather_time'], '%Y-%m-%dT%H:%M:%SZ'))
+        newest_agent.initial_time = pytz.timezone('UTC').localize(datetime.datetime.strptime(new_weather_data[0]['weather_time'], '%Y-%m-%dT%H:%M:%SZ'))
     
         return output
 
@@ -127,8 +127,8 @@ class Operator(util.OperatorBase):
                     self.rewards.append(oldest_agent.reward)
                 self.replay_buffer.append(oldest_agent) 
 
-        sunrise = sun.sunrise(self.observer, date=time, tzinfo='Europe/Berlin')
-        sunset = sun.sunset(self.observer, date=time, tzinfo='Europe/Berlin') 
+        sunrise = sun.sunrise(self.observer, date=time, tzinfo='UTC')
+        sunset = sun.sunset(self.observer, date=time, tzinfo='UTC') 
         if (sunrise<time) and (time<sunset):
             if new_power_value != None:
                self.daylight_power_history.append(new_power_value)
