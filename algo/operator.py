@@ -32,7 +32,7 @@ import datetime
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id, power_history_start_stop=2, buffer_len='48', p_1='1', p_0='1', history_modus='daylight', power_td=0.17, weather_dim=6, data_path="data"):
+    def __init__(self, energy_src_id, weather_src_id, power_history_start_stop='2', buffer_len='48', p_1='1', p_0='1', history_modus='daylight', power_td=0.17, weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
 
