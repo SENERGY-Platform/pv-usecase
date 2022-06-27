@@ -116,7 +116,7 @@ class Operator(util.OperatorBase):
         for i, agent in enumerate(self.agents):
             if agent.initial_time + datetime.timedelta(hours=2) >= time:
                 if new_power_value != None:
-                    agent.update_power_list(new_power_value)
+                    agent.update_power_list(time, new_power_value)
             elif agent.initial_time + datetime.timedelta(hours=2) < time:
                 oldest_agent = self.agents.pop(i)
                 self.agents_data.append(oldest_agent)

@@ -36,8 +36,8 @@ class Agent:
     def save_weather_data(self,weather_data):
         self.initial_weather_data = weather_data
         
-    def update_power_list(self,new_power_value):
-        self.power_list.append(new_power_value)
+    def update_power_list(self,time, new_power_value):
+        self.power_list.append((time, new_power_value))
         
     def act(self, policy):
         state = self.initial_weather_data
@@ -49,7 +49,7 @@ class Agent:
         return  action, log_prob
     
     def get_reward(self, action, p_1, p_0, history):
-        agents_power_mean = sum(self.power_list)/len(self.power_list)
+        agents_power_mean = sum([power_value for _, power_value in self.power_list])/len([power_value for _, power_value in self.power_list])
         history_mean = sum(history)/len(history)
         
         if action.item()==1:    # 'YES'
