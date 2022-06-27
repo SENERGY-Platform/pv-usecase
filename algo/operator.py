@@ -145,7 +145,7 @@ class Operator(util.OperatorBase):
             pickle.dump(self.actions, f)
         with open(self.rewards_file, 'wb') as f:
             pickle.dump(self.rewards, f)
-        with open(self.agents_data, 'wb') as f:
+        with open(self.agents_data_file, 'wb') as f:
             pickle.dump(self.agents_data)
 
     def run(self, data, selector):
