@@ -146,7 +146,7 @@ class Operator(util.OperatorBase):
         with open(self.rewards_file, 'wb') as f:
             pickle.dump(self.rewards, f)
         with open(self.agents_data_file, 'wb') as f:
-            pickle.dump(self.agents_data)
+            pickle.dump(self.agents_data, f)
 
     def run(self, data, selector):
         if os.getenv("DEBUG") is not None and os.getenv("DEBUG").lower() == "true":
