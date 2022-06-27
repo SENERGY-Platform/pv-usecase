@@ -63,13 +63,15 @@ class Operator(util.OperatorBase):
         self.actions = []
         self.rewards = []
         self.weather_data = []
+        self.agents_data = []
 
-        self.power_lists_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_power_lists_{self.p_1}_{self.p_0}_{self.history_modus}.pickle'
-        self.actions_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_actions_{self.p_1}_{self.p_0}_{self.history_modus}.pickle'
-        self.rewards_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_rewards_{self.p_1}_{self.p_0}_{self.history_modus}.pickle'
-        self.weather_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_weather_{self.p_1}_{self.p_0}_{self.history_modus}.pickle'
+        self.power_lists_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_power_lists_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
+        self.actions_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_actions_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
+        self.rewards_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_rewards_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
+        self.weather_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_weather_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
+        self.agents_data_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_agents_data_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
 
-        self.model_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_model_{self.p_1}_{self.p_0}_{self.history_modus}.pt'
+        self.model_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_model_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pt'
 
         #if os.path.exists(self.model_file):
         #    self.policy.load_state_dict(torch.load(self.model_file))
@@ -117,6 +119,7 @@ class Operator(util.OperatorBase):
                     agent.update_power_list(new_power_value)
             elif agent.initial_time + datetime.timedelta(hours=2) < time:
                 oldest_agent = self.agents.pop(i)
+                self.agents_data.append(oldest_agent)
                 if len(self.replay_buffer)==self.buffer_len and oldest_agent.power_list != []:
                     oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
                     if self.history_modus=='all':
@@ -142,6 +145,8 @@ class Operator(util.OperatorBase):
             pickle.dump(self.actions, f)
         with open(self.rewards_file, 'wb') as f:
             pickle.dump(self.rewards, f)
+        with open(self.agents_data, 'wb') as f:
+            pickle.dump(self.agents_data)
 
     def run(self, data, selector):
         if os.getenv("DEBUG") is not None and os.getenv("DEBUG").lower() == "true":
