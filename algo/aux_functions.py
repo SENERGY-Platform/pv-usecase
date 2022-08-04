@@ -4,7 +4,7 @@ import datetime
 import pytz
 
 def preprocess_power_data(new_power_data):
-    time=pd.datetime(new_power_data['energy_time'])
+    time=pd.to_datetime(new_power_data['energy_time'])
     power = new_power_data['energy']
     return time, power
 
