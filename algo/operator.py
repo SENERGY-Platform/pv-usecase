@@ -33,11 +33,13 @@ import datetime
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id, power_history_start_stop='2', buffer_len='48', p_1='1', p_0='1', history_modus='daylight', power_td=0.17, weather_dim=6, data_path="data"):
+    def __init__(self, energy_src_id, weather_src_id, lat=51.34, long=12.38, power_history_start_stop='2', buffer_len='48', p_1='1', p_0='1', history_modus='daylight', power_td=0.17, weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
-
-        self.observer = astral.Observer(latitude=51.34, longitude=12.38)
+        
+        self.lat = lat
+        self.long = long
+        self.observer = astral.Observer(latitude=self.lat, longitude=self.long)
 
         self.energy_src_id = energy_src_id
         self.weather_src_id = weather_src_id
@@ -107,7 +109,10 @@ class Operator(util.OperatorBase):
         newest_agent.save_weather_data(new_weather_input)
         newest_agent.initial_time = pd.to_datetime(new_weather_data[0]['weather_time'])
     
-        return output
+        if output==0:
+            return {"value": 0}
+        elif output==1:
+            return {"value": 1}
 
     def run_new_power(self, new_power_data):
         time, new_power_value = aux_functions.preprocess_power_data(new_power_data)

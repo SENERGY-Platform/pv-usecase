@@ -56,6 +56,8 @@ if __name__ == '__main__':
         power_td=opr_config.config.power_td,
         weather_dim=opr_config.config.weather_dim,
         data_path=opr_config.config.data_path,
+        lat = opr_config.config.lat,
+        long = opr_config.config.long
     )
     operator.init(
         kafka_consumer=kafka_consumer,
