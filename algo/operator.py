@@ -69,8 +69,6 @@ class Operator(util.OperatorBase):
         self.weather_data = []
         self.agents_data = []
 
-        self.data_for_power_forecast = []
-
         self.power_lists_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_power_lists_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
         self.actions_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_actions_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
         self.rewards_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_rewards_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
@@ -160,21 +158,20 @@ class Operator(util.OperatorBase):
             pickle.dump(self.agents_data, f)
 
 
-    def create_power_forecast_plot(self, weather_time, new_weather_data):
+    def create_power_forecast_plot(self, new_weather_data):
+        self.policy.eval() 
+        weather_forecast_probabilities = []
         new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
-        new_weather_input = np.mean(new_weather_array, axis=0)
-
-        self.policy.eval()   
-        with torch.no_grad():
-            input = torch.from_numpy(new_weather_input).float().unsqueeze(0)
-            probability = self.policy(input).item()
-        self.policy.train()
-        self.data_for_power_forecast.append([weather_time, probability])
-        if self.data_for_power_forecast[-1][0]-self.data_for_power_forecast[0][0] > pd.Timedelta(7,'days'):
-            self.data_for_power_forecast.pop(0)
-        plt.plot([entry[0] for entry in self.data_for_power_forecast], [entry[1] for entry in self.data_for_power_forecast])
+        new_weather_forecasted_for = [pd.to_datetime(datapoint['forecasted_for']).tz_localize(None) for datapoint in new_weather_data]
+        for i in range(0,len(new_weather_array),3):
+            new_weather_input = np.mean(new_weather_array[i:i+3], axis=0)
+            with torch.no_grad():
+                input = torch.from_numpy(new_weather_input).float().unsqueeze(0)
+                probability = self.policy(input).item()
+            weather_forecast_probabilities.append(probability)
+        plt.plot([new_weather_forecasted_for[i+1] for i in range(0,len(new_weather_forecasted_for),3)], weather_forecast_probabilities)
         plt.savefig(self.power_forecast_plot_file)
-        
+        self.policy.train()
 
 
     def run(self, data, selector):
@@ -186,20 +183,12 @@ class Operator(util.OperatorBase):
                     self.weather_same_timestamp.append(data)
                 elif data['weather_time'] != self.weather_same_timestamp[-1]['weather_time']:
                     new_weather_data = self.weather_same_timestamp
-                    output = self.run_new_weather(new_weather_data)
+                    output = self.run_new_weather(new_weather_data[0:3])
+                    self.create_power_forecast_plot(new_weather_data)
                     self.weather_same_timestamp = [data] 
                     return output
             elif self.weather_same_timestamp == []:
                 self.weather_same_timestamp.append(data)
         elif selector == 'power_func':
             self.run_new_power(data)
-        elif selector == 'weather_func_test':
-            if self.weather_same_timestamp != []:
-                if data['weather_time'] == self.weather_same_timestamp[-1]['weather_time']:
-                    self.weather_same_timestamp.append(data)
-                elif data['weather_time'] != self.weather_same_timestamp[-1]['weather_time']:
-                    new_weather_data = self.weather_same_timestamp
-                    self.create_power_forecast_plot(data['weather_time'], new_weather_data)
-                    self.weather_same_timestamp = [data] 
-            elif self.weather_same_timestamp == []:
-                self.weather_same_timestamp.append(data)
+                
