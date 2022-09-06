@@ -8,3 +8,4 @@ kazoo<3
 astral
 datetime
 pytz
+matplotlib
