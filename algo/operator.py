@@ -169,8 +169,8 @@ class Operator(util.OperatorBase):
                 input = torch.from_numpy(new_weather_input).float().unsqueeze(0)
                 probability = self.policy(input).item()
             weather_forecast_probabilities.append(probability)
-        print([new_weather_forecasted_for[i+1] for i in range(0,len(new_weather_forecasted_for),3)], weather_forecast_probabilities)
-        plt.plot([new_weather_forecasted_for[i+1] for i in range(0,len(new_weather_forecasted_for),3)], weather_forecast_probabilities)
+        fig, ax = plt.subplots(1,1,figsize=(30,15))
+        ax.plot([new_weather_forecasted_for[i+1] for i in range(0,len(new_weather_forecasted_for),3)], weather_forecast_probabilities,'bo')
         plt.savefig(self.power_forecast_plot_file)
         self.policy.train()
 
