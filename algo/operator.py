@@ -184,10 +184,11 @@ class Operator(util.OperatorBase):
             if len(self.weather_same_timestamp)<47:
                 self.weather_same_timestamp.append(data)
             elif len(self.weather_same_timestamp)==47:
-                new_weather_data = self.weather_same_timestamp.append(data)
-                self.weather_same_timestamp = []
+                self.weather_same_timestamp.append(data)
+                new_weather_data = self.weather_same_timestamp
                 output = self.run_new_weather(new_weather_data[0:3])
                 power_forecast = self.create_power_forecast(new_weather_data)
+                self.weather_same_timestamp = []
                 return [{'timestamp':timestamp, 'value': probability} for timestamp, probability in power_forecast]
         elif selector == 'power_func':
             self.run_new_power(data)
