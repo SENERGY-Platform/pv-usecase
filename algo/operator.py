@@ -30,6 +30,7 @@ import astral
 from astral import sun
 import pytz
 import datetime
+import matplotlib.pyplot as plt
 
 
 class Operator(util.OperatorBase):
@@ -168,6 +169,9 @@ class Operator(util.OperatorBase):
                 input = torch.from_numpy(new_weather_input).float().unsqueeze(0)
                 probability = self.policy(input).squeeze()[1]
             power_forecast.append((new_weather_forecasted_for[i],probability))
+        fig, ax = plt.subplots(1,1,figsize=(30,30))
+        ax.plot([timestamp for timestamp,_ in power_forecast],[probability for _,probability in power_forecast])
+        plt.savefig(self.power_forecast_plot_file)
         self.policy.train()
         return power_forecast
         
@@ -177,17 +181,14 @@ class Operator(util.OperatorBase):
         if os.getenv("DEBUG") is not None and os.getenv("DEBUG").lower() == "true":
             print(selector + ": " + str(data))
         if selector == 'weather_func':
-            if self.weather_same_timestamp != []:
-                if data['weather_time'] == self.weather_same_timestamp[-1]['weather_time']:
-                    self.weather_same_timestamp.append(data)
-                elif data['weather_time'] != self.weather_same_timestamp[-1]['weather_time']:
-                    new_weather_data = self.weather_same_timestamp
-                    output = self.run_new_weather(new_weather_data[0:3])
-                    power_forecast = self.create_power_forecast(new_weather_data)
-                    self.weather_same_timestamp = [data] 
-                    return [{'timestamp':timestamp, 'value': probability} for timestamp, probability in power_forecast]
-            elif self.weather_same_timestamp == []:
+            if len(self.weather_same_timestamp)<47:
                 self.weather_same_timestamp.append(data)
+            elif len(self.weather_same_timestamp)==47:
+                new_weather_data = self.weather_same_timestamp.append(data)
+                self.weather_same_timestamp = []
+                output = self.run_new_weather(new_weather_data[0:3])
+                power_forecast = self.create_power_forecast(new_weather_data)
+                return [{'timestamp':timestamp, 'value': probability} for timestamp, probability in power_forecast]
         elif selector == 'power_func':
             self.run_new_power(data)
                 
