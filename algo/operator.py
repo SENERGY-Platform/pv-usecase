@@ -30,7 +30,6 @@ import astral
 from astral import sun
 import pytz
 import datetime
-import matplotlib.pyplot as plt
 
 
 class Operator(util.OperatorBase):
@@ -158,9 +157,9 @@ class Operator(util.OperatorBase):
             pickle.dump(self.agents_data, f)
 
 
-    def create_power_forecast_plot(self, new_weather_data):
+    def create_power_forecast(self, new_weather_data):
         self.policy.eval() 
-        weather_forecast_probabilities = []
+        power_forecast = []
         new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
         new_weather_forecasted_for = [pd.to_datetime(datapoint['forecasted_for']).tz_localize(None) for datapoint in new_weather_data]
         for i in range(0,len(new_weather_array),3):
@@ -168,11 +167,10 @@ class Operator(util.OperatorBase):
             with torch.no_grad():
                 input = torch.from_numpy(new_weather_input).float().unsqueeze(0)
                 probability = self.policy(input).squeeze()[1]
-            weather_forecast_probabilities.append(probability)
-        fig, ax = plt.subplots(1,1,figsize=(30,15))
-        ax.bar([new_weather_forecasted_for[i+1] for i in range(0,len(new_weather_forecasted_for),3)], weather_forecast_probabilities, width=0.1)
-        plt.savefig(self.power_forecast_plot_file)
+            power_forecast.append((new_weather_forecasted_for[i],probability))
         self.policy.train()
+        return power_forecast
+        
 
 
     def run(self, data, selector):
@@ -185,9 +183,9 @@ class Operator(util.OperatorBase):
                 elif data['weather_time'] != self.weather_same_timestamp[-1]['weather_time']:
                     new_weather_data = self.weather_same_timestamp
                     output = self.run_new_weather(new_weather_data[0:3])
-                    self.create_power_forecast_plot(new_weather_data)
+                    power_forecast = self.create_power_forecast(new_weather_data)
                     self.weather_same_timestamp = [data] 
-                    return output
+                    return [{'timestamp':timestamp, 'value': probability} for timestamp, probability in power_forecast]
             elif self.weather_same_timestamp == []:
                 self.weather_same_timestamp.append(data)
         elif selector == 'power_func':
