@@ -68,7 +68,10 @@ class OperatorBase:
                             data=result.data
                         )
                         if run_result is not None:
-                            run_results.append(run_result)
+                            if isinstance(run_result, list):
+                                run_results += run_result
+                            else:
+                                run_results.append(run_result)
                 else:
                     logger.error(result.ex)
         except mf_lib.exceptions.NoFilterError:
