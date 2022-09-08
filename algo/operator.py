@@ -170,7 +170,7 @@ class Operator(util.OperatorBase):
                 probability = self.policy(input).squeeze()[1]
             weather_forecast_probabilities.append(probability)
         fig, ax = plt.subplots(1,1,figsize=(30,15))
-        ax.bar([new_weather_forecasted_for[i+1] for i in range(0,len(new_weather_forecasted_for),3)], weather_forecast_probabilities, width=1)
+        ax.bar([new_weather_forecasted_for[i+1] for i in range(0,len(new_weather_forecasted_for),3)], weather_forecast_probabilities, width=0.7)
         plt.savefig(self.power_forecast_plot_file)
         self.policy.train()
 
