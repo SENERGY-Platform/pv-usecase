@@ -167,7 +167,7 @@ class Operator(util.OperatorBase):
             new_weather_input = np.mean(new_weather_array[i:i+3], axis=0)
             with torch.no_grad():
                 input = torch.from_numpy(new_weather_input).float().unsqueeze(0)
-                probability = self.policy(input).squeeze()[1]
+                probability = float(self.policy(input).squeeze()[1])
             power_forecast.append((new_weather_forecasted_for[i],probability))
         fig, ax = plt.subplots(1,1,figsize=(30,30))
         ax.plot([timestamp for timestamp,_ in power_forecast],[probability for _,probability in power_forecast])
