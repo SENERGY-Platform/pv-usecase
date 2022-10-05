@@ -34,12 +34,12 @@ import matplotlib.pyplot as plt
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id, lat=51.34, long=12.38, power_history_start_stop='2', buffer_len='48', p_1='1', p_0='1', history_modus='daylight', power_td=0.17, weather_dim=6, data_path="data"):
+    def __init__(self, energy_src_id, weather_src_id, lat, long, power_history_start_stop='2', buffer_len='48', p_1='1', p_0='1', history_modus='daylight', power_td=0.17, weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
         
-        self.lat = lat
-        self.long = long
+        self.lat = float(lat)
+        self.long = float(long)
         self.observer = astral.Observer(latitude=self.lat, longitude=self.long)
 
         self.energy_src_id = energy_src_id
