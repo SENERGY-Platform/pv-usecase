@@ -13,6 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 """
+import sys
 
 import util
 import algo
@@ -33,6 +34,9 @@ if __name__ == '__main__':
     for it in opr_config.inputTopics:
         filter_handler.add_filter(util.gen_filter(input_topic=it, selectors=opr_config.config.selectors, pipeline_id=dep_config.pipeline_id))
     kafka_brokers = ",".join(util.get_kafka_brokers(zk_hosts=dep_config.zk_quorum, zk_path=dep_config.zk_brokers_path))
+    if kafka_brokers == "":
+        util.logger.error("no kafka brokers - exiting")
+        exit(1)
     kafka_consumer_config = {
         "metadata.broker.list": kafka_brokers,
         "group.id": dep_config.config_application_id,
