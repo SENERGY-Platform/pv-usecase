@@ -9,3 +9,4 @@ astral
 datetime
 pytz
 matplotlib
+tzdata
