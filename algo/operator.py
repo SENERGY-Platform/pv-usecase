@@ -111,6 +111,11 @@ class Operator(util.OperatorBase):
         time, new_power_value = aux_functions.preprocess_power_data(new_power_data)
         if new_power_value != None:
             self.power_history.append(new_power_value)
+        sunrise = pd.to_datetime(sun.sunrise(self.observer, date=time, tzinfo='UTC'))
+        sunset = pd.to_datetime(sun.sunset(self.observer, date=time, tzinfo='UTC')) 
+        if (sunrise+pd.Timedelta(self.power_history_start_stop, 'hours')<time) and (time+pd.Timedelta(self.power_history_start_stop, 'hours')<sunset):
+            if new_power_value != None:
+               self.daylight_power_history.append(new_power_value)
 
         for i, agent in enumerate(self.agents):
             if agent.initial_time + pd.Timedelta(2,'hours') >= time:
@@ -118,22 +123,18 @@ class Operator(util.OperatorBase):
                     agent.update_power_list(time, new_power_value)
             elif agent.initial_time + pd.Timedelta(2,'hours') < time:
                 oldest_agent = self.agents.pop(i)
-                self.agents_data.append(oldest_agent)
                 if len(self.replay_buffer)==self.buffer_len and oldest_agent.power_list != []:
                     oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
                     oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, self.daylight_power_history)
                     oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, self.optimizer)
+                    self.agents_data.append(oldest_agent)
                     self.power_lists.append(oldest_agent.power_list)
                     self.actions.append(oldest_agent.action)
                     self.rewards.append(oldest_agent.reward)
                 if oldest_agent.power_list != []:
                     self.replay_buffer.append(oldest_agent) 
 
-        sunrise = pd.to_datetime(sun.sunrise(self.observer, date=time, tzinfo='UTC'))
-        sunset = pd.to_datetime(sun.sunset(self.observer, date=time, tzinfo='UTC')) 
-        if (sunrise+pd.Timedelta(self.power_history_start_stop, 'hours')<time) and (time+pd.Timedelta(self.power_history_start_stop, 'hours')<sunset):
-            if new_power_value != None:
-               self.daylight_power_history.append(new_power_value)
+        
 
         with open(self.power_lists_file, 'wb') as f:
             pickle.dump(self.power_lists, f)
