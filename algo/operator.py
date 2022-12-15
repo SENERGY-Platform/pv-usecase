@@ -34,16 +34,13 @@ import matplotlib.pyplot as plt
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, energy_src_id, weather_src_id, lat, long, power_history_start_stop='2', buffer_len='48', p_1='1', p_0='1', history_modus='daylight', power_td=0.17, weather_dim=6, data_path="data"):
+    def __init__(self, lat, long, power_history_start_stop='2', buffer_len='48', power_td=0.17, weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
         
         self.lat = float(lat)
         self.long = float(long)
         self.observer = astral.Observer(latitude=self.lat, longitude=self.long)
-
-        self.energy_src_id = energy_src_id
-        self.weather_src_id = weather_src_id
 
         self.weather_same_timestamp = []
 
@@ -54,11 +51,7 @@ class Operator(util.OperatorBase):
         self.replay_buffer = deque(maxlen=self.buffer_len)
         self.power_history = deque(maxlen=self.history_power_len) 
         self.daylight_power_history = deque(maxlen=int(self.history_power_len/2))
-        self.history_modus = history_modus
 
-        self.p_1 = int(p_1)
-        self.p_0 = int(p_0)
-        
         self.agents = []
         self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
         self.optimizer = optim.Adam(self.policy.parameters(), lr=1e-2)
@@ -69,15 +62,15 @@ class Operator(util.OperatorBase):
         self.weather_data = []
         self.agents_data = []
 
-        self.power_lists_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_power_lists_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
-        self.actions_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_actions_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
-        self.rewards_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_rewards_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
-        self.weather_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_weather_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
-        self.agents_data_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_agents_data_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pickle'
+        self.power_lists_file = f'{data_path}/power_lists_{self.power_history_start_stop}.pickle'
+        self.actions_file = f'{data_path}/actions_{self.power_history_start_stop}.pickle'
+        self.rewards_file = f'{data_path}/rewards_{self.power_history_start_stop}.pickle'
+        self.weather_file = f'{data_path}/weather_{self.power_history_start_stop}.pickle'
+        self.agents_data_file = f'{data_path}/agents_data_{self.power_history_start_stop}.pickle'
 
-        self.model_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_model_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.pt'
+        self.model_file = f'{data_path}/model_{self.power_history_start_stop}.pt'
 
-        self.power_forecast_plot_file = f'{data_path}/{self.energy_src_id}_{self.weather_src_id}_histogram_{self.p_1}_{self.p_0}_{self.history_modus}_{self.power_history_start_stop}.png'
+        self.power_forecast_plot_file = f'{data_path}/histogram_{self.power_history_start_stop}.png'
 
         #if os.path.exists(self.model_file):
         #    self.policy.load_state_dict(torch.load(self.model_file))
@@ -98,10 +91,7 @@ class Operator(util.OperatorBase):
             random.shuffle(self.replay_buffer)
             for agent in self.replay_buffer:
                 agent.action, agent.log_prob = agent.act(self.policy)
-                if self.history_modus=='all':
-                    agent.reward = agent.get_reward(agent.action, self.p_1, self.p_0, self.power_history)
-                elif self.history_modus=='daylight':
-                    agent.reward = agent.get_reward(agent.action, self.p_1, self.p_0, self.daylight_power_history)
+                agent.reward = agent.get_reward(agent.action, self.daylight_power_history)
                 agent.learn(agent.reward, agent.log_prob, self.optimizer)
 
         torch.save(self.policy.state_dict(), self.model_file)
@@ -131,10 +121,7 @@ class Operator(util.OperatorBase):
                 self.agents_data.append(oldest_agent)
                 if len(self.replay_buffer)==self.buffer_len and oldest_agent.power_list != []:
                     oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
-                    if self.history_modus=='all':
-                        oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, self.p_1, self.p_0, self.power_history)
-                    elif self.history_modus=='daylight':
-                        oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, self.p_1, self.p_0, self.daylight_power_history)
+                    oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, self.daylight_power_history)
                     oldest_agent.learn(oldest_agent.reward, oldest_agent.log_prob, self.optimizer)
                     self.power_lists.append(oldest_agent.power_list)
                     self.actions.append(oldest_agent.action)
