@@ -50,13 +50,8 @@ if __name__ == '__main__':
     kafka_consumer = confluent_kafka.Consumer(kafka_consumer_config, logger=util.logger)
     kafka_producer = confluent_kafka.Producer(kafka_producer_config, logger=util.logger)
     operator = algo.Operator(
-        energy_src_id=opr_config.config.energy_src_id,
-        weather_src_id=opr_config.config.weather_src_id,
         power_history_start_stop=opr_config.config.power_history_start_stop,
         buffer_len=opr_config.config.buffer_len,
-        p_1=opr_config.config.p_1,
-        p_0=opr_config.config.p_0,
-        history_modus=opr_config.config.history_modus,
         power_td=opr_config.config.power_td,
         weather_dim=opr_config.config.weather_dim,
         data_path=opr_config.config.data_path,

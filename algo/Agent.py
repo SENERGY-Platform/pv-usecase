@@ -48,14 +48,14 @@ class Agent:
         log_prob = m.log_prob(action)
         return  action, log_prob
     
-    def get_reward(self, action, p_1, p_0, history):
+    def get_reward(self, action, history):
         agents_power_mean = sum([power_value for _, power_value in self.power_list])/len([power_value for _, power_value in self.power_list])
         history_mean = sum(history)/len(history)
         
         if action.item()==1:    # 'YES'
-            reward = np.sign(agents_power_mean-history_mean)**(p_1+1)*(agents_power_mean-history_mean)**p_1
+            reward = agents_power_mean-history_mean
         elif action.item()==0:  # 'NO'
-            reward = np.sign(history_mean-agents_power_mean)**(p_0+1)*(history_mean-agents_power_mean)**p_0
+            reward = history_mean-agents_power_mean
             
         return reward
     
