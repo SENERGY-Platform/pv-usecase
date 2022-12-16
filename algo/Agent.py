@@ -45,8 +45,13 @@ class Agent:
         probs = policy(state).cpu()
         m = Categorical(probs)
         action = m.sample()
-        log_prob = m.log_prob(action)
-        return  action, log_prob
+        log_prob_action = m.log_prob(action)
+        if action==torch.tensor(0):
+            other_action = torch.tensor(1)
+        elif action==torch.tensor(1):
+            other_action = torch.tensor(0)
+        log_prob_other_action = m.log_prob(other_action)
+        return  action, log_prob_action, other_action, log_prob_other_action
     
     def get_reward(self, action, history):
         agents_power_mean = sum([power_value for _, power_value in self.power_list])/len([power_value for _, power_value in self.power_list])
@@ -59,9 +64,10 @@ class Agent:
             
         return reward
     
-    def learn(self, reward, log_prob, optimizer):
-        policy_loss = -reward*log_prob
+    def learn(self, list_of_reward_log_prob_pairs, optimizer):
+        for reward, log_prob in list_of_reward_log_prob_pairs:
+            policy_loss = -reward*log_prob
+            optimizer.zero_grad()
+            policy_loss.backward()
+            optimizer.step()
         
-        optimizer.zero_grad()
-        policy_loss.backward()
-        optimizer.step()
