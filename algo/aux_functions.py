@@ -1,7 +1,5 @@
 import numpy as np
 import pandas as pd
-import datetime
-import pytz
 
 def preprocess_power_data(new_power_data):
     time=pd.to_datetime(new_power_data['energy_time'])

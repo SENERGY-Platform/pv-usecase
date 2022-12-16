@@ -28,8 +28,6 @@ import os
 import random
 import astral
 from astral import sun
-import pytz
-import datetime
 import matplotlib.pyplot as plt
 
 
@@ -139,8 +137,6 @@ class Operator(util.OperatorBase):
                 if oldest_agent.power_list != []:
                     self.replay_buffer.append(oldest_agent) 
 
-        
-
         with open(self.power_lists_file, 'wb') as f:
             pickle.dump(self.power_lists, f)
         with open(self.actions_file, 'wb') as f:
@@ -149,7 +145,6 @@ class Operator(util.OperatorBase):
             pickle.dump(self.rewards, f)
         with open(self.agents_data_file, 'wb') as f:
             pickle.dump(self.agents_data, f)
-
 
     def create_power_forecast(self, new_weather_data):
         self.policy.eval() 
@@ -168,8 +163,6 @@ class Operator(util.OperatorBase):
         self.policy.train()
         return power_forecast
         
-
-
     def run(self, data, selector):
         if os.getenv("DEBUG") is not None and os.getenv("DEBUG").lower() == "true":
             print(selector + ": " + str(data))
@@ -179,11 +172,10 @@ class Operator(util.OperatorBase):
             elif len(self.weather_same_timestamp)==47:
                 self.weather_same_timestamp.append(data)
                 new_weather_data = self.weather_same_timestamp
-                output = self.run_new_weather(new_weather_data[0:3])
+                _ = self.run_new_weather(new_weather_data[0:3])
                 power_forecast = self.create_power_forecast(new_weather_data)
                 self.weather_same_timestamp = []
                 if len(self.replay_buffer)==self.buffer_len:
                     return [{'timestamp':timestamp.strftime('%Y-%m-%d %X')+'Z', 'value': probability} for timestamp, probability in power_forecast]
         elif selector == 'power_func':
             self.run_new_power(data)
-                
