@@ -32,7 +32,6 @@ class Selector(simple_struct.Structure):
 
 class Config(simple_struct.Structure):
     logger_level = "warning"
-    power_td: str = None
     weather_dim = 6
     data_path = "/opt/data"
     selectors: typing.List[Selector] = None

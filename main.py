@@ -52,7 +52,6 @@ if __name__ == '__main__':
     operator = algo.Operator(
         power_history_start_stop=opr_config.config.power_history_start_stop,
         buffer_len=opr_config.config.buffer_len,
-        power_td=opr_config.config.power_td,
         weather_dim=opr_config.config.weather_dim,
         data_path=opr_config.config.data_path,
         lat = opr_config.config.lat,
