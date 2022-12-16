@@ -34,7 +34,7 @@ import matplotlib.pyplot as plt
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, lat, long, power_history_start_stop='2', buffer_len='48', power_td=0.17, weather_dim=6, data_path="data"):
+    def __init__(self, lat, long, power_history_start_stop='2', buffer_len='48', weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
         
@@ -47,10 +47,10 @@ class Operator(util.OperatorBase):
         self.power_history_start_stop = int(power_history_start_stop)
 
         self.buffer_len = int(buffer_len)
-        self.history_power_len = int(10000/float(power_td)) # power_td is the time difference between two consecutive power values in minutes
+        self.history_power_len = pd.Timedelta(7,'days')
         self.replay_buffer = deque(maxlen=self.buffer_len)
-        self.power_history = deque(maxlen=self.history_power_len) 
-        self.daylight_power_history = deque(maxlen=int(self.history_power_len/2))
+        self.power_history = []
+        self.daylight_power_history = []
 
         self.agents = []
         self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
@@ -110,12 +110,16 @@ class Operator(util.OperatorBase):
     def run_new_power(self, new_power_data):
         time, new_power_value = aux_functions.preprocess_power_data(new_power_data)
         if new_power_value != None:
-            self.power_history.append(new_power_value)
+            self.power_history.append((time,new_power_value))
+            if time-self.power_history[0][0] > self.history_power_len:
+                del self.power_history[0]
         sunrise = pd.to_datetime(sun.sunrise(self.observer, date=time, tzinfo='UTC'))
         sunset = pd.to_datetime(sun.sunset(self.observer, date=time, tzinfo='UTC')) 
         if (sunrise+pd.Timedelta(self.power_history_start_stop, 'hours')<time) and (time+pd.Timedelta(self.power_history_start_stop, 'hours')<sunset):
             if new_power_value != None:
-               self.daylight_power_history.append(new_power_value)
+               self.daylight_power_history.append((time,new_power_value))
+               if time-self.daylight_power_history[0][0] > self.history_power_len:
+                   del self.daylight_power_history[0]
 
         for i, agent in enumerate(self.agents):
             if agent.initial_time + pd.Timedelta(2,'hours') >= time:
