@@ -167,9 +167,9 @@ class Operator(util.OperatorBase):
         if os.getenv("DEBUG") is not None and os.getenv("DEBUG").lower() == "true":
             print(selector + ": " + str(data))
         if selector == 'weather_func':
-            if len(self.weather_same_timestamp)<47:
+            if len(self.weather_same_timestamp)<9:
                 self.weather_same_timestamp.append(data)
-            elif len(self.weather_same_timestamp)==47:
+            elif len(self.weather_same_timestamp)==9:
                 self.weather_same_timestamp.append(data)
                 new_weather_data = self.weather_same_timestamp
                 _ = self.run_new_weather(new_weather_data[0:3])
