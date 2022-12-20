@@ -99,7 +99,7 @@ class Operator(util.OperatorBase):
         
         newest_agent = self.agents[-1]
         newest_agent.save_weather_data(new_weather_input)
-        newest_agent.initial_time = pd.to_datetime(new_weather_data[0]['weather_time'])
+        newest_agent.initial_time = pd.to_datetime(new_weather_data[0]['weather_time']).tz_localize(None)
     
         if output==0:
             return {"value": 0}
