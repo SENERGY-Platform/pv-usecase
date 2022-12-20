@@ -112,8 +112,8 @@ class Operator(util.OperatorBase):
             self.power_history.append((time,new_power_value))
             if time-self.power_history[0][0] > self.history_power_len:
                 del self.power_history[0]
-        sunrise = pd.to_datetime(sun.sunrise(self.observer, date=time, tzinfo='UTC'))
-        sunset = pd.to_datetime(sun.sunset(self.observer, date=time, tzinfo='UTC')) 
+        sunrise = pd.to_datetime(sun.sunrise(self.observer, date=time, tzinfo='UTC')).tz_localize(None)
+        sunset = pd.to_datetime(sun.sunset(self.observer, date=time, tzinfo='UTC')).tz_localize(None)
         if (sunrise+pd.Timedelta(self.power_history_start_stop, 'hours')<time) and (time+pd.Timedelta(self.power_history_start_stop, 'hours')<sunset):
             if new_power_value != None:
                self.daylight_power_history.append((time,new_power_value))
