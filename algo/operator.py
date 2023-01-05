@@ -120,22 +120,31 @@ class Operator(util.OperatorBase):
                if time-self.daylight_power_history[0][0] > self.history_power_len:
                    del self.daylight_power_history[0]
 
+        old_agents = []
+        old_indices = []
+        
         for i, agent in enumerate(self.agents):
             if agent.initial_time + pd.Timedelta(2,'hours') >= time:
                 if new_power_value != None:
                     agent.update_power_list(time, new_power_value)
             elif agent.initial_time + pd.Timedelta(2,'hours') < time:
-                oldest_agent = self.agents.pop(i)
-                if len(self.replay_buffer)==self.buffer_len and oldest_agent.power_list != []:
-                    oldest_agent.action, oldest_agent.log_prob = oldest_agent.act(self.policy)
-                    oldest_agent.reward = oldest_agent.get_reward(oldest_agent.action, self.daylight_power_history)
-                    oldest_agent.learn([(oldest_agent.reward, oldest_agent.log_prob)], self.optimizer)
-                    self.agents_data.append(oldest_agent)
-                    self.power_lists.append(oldest_agent.power_list)
-                    self.actions.append(oldest_agent.action)
-                    self.rewards.append(oldest_agent.reward)
-                if oldest_agent.power_list != []:
-                    self.replay_buffer.append(oldest_agent) 
+                old_agents.append(agent)
+                old_indices.append(i)
+
+        old_indices = sorted(old_indices, reverse=True)
+        for index in old_indices:
+            del self.agents[index]
+        for old_agent in old_agents:
+            if len(self.replay_buffer)==self.buffer_len and old_agent.power_list != []:
+                old_agent.action, old_agent.log_prob = old_agent.act(self.policy)
+                old_agent.reward = old_agent.get_reward(old_agent.action, self.daylight_power_history)
+                old_agent.learn([(old_agent.reward, old_agent.log_prob)], self.optimizer)
+                self.agents_data.append(old_agent)
+                self.power_lists.append(old_agent.power_list)
+                self.actions.append(old_agent.action)
+                self.rewards.append(old_agent.reward)
+            if old_agent.power_list != []:
+                self.replay_buffer.append(old_agent)
 
         with open(self.power_lists_file, 'wb') as f:
             pickle.dump(self.power_lists, f)
