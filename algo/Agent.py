@@ -64,9 +64,15 @@ class Agent:
         return reward
     
     def learn(self, list_of_reward_log_prob_pairs, optimizer):
+        learn_step_count = 0
+        number_of_different_actions_to_learn_from = len(list_of_reward_log_prob_pairs)
         for reward, log_prob in list_of_reward_log_prob_pairs:
             policy_loss = -reward*log_prob
             optimizer.zero_grad()
-            policy_loss.backward()
+            if learn_step_count==0 and number_of_different_actions_to_learn_from==2:
+                policy_loss.backward(retain_graph=True) # If we want to learn from the second action as well we have to go through the gradient graph a second time!
+            else:
+                policy_loss.backward()
             optimizer.step()
+            learn_step_count += 1
         
