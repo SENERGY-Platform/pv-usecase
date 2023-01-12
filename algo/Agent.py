@@ -46,9 +46,9 @@ class Agent:
         action = m.sample()
         log_prob_action = m.log_prob(action)
         if action==torch.tensor(0):
-            other_action = torch.tensor(1)
+            other_action = action+torch.tensor(1) # ==1
         elif action==torch.tensor(1):
-            other_action = torch.tensor(0)
+            other_action = action-torch.tensor(1) ## ==0
         log_prob_other_action = m.log_prob(other_action)
         return  action, log_prob_action, other_action, log_prob_other_action
     

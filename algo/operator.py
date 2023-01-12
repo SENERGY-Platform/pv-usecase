@@ -70,6 +70,8 @@ class Operator(util.OperatorBase):
 
         self.power_forecast_plot_file = f'{data_path}/histogram_{self.power_history_start_stop}.png'
 
+        torch.autograd.set_detect_anomaly(True)
+
         #if os.path.exists(self.model_file):
         #    self.policy.load_state_dict(torch.load(self.model_file))
 
