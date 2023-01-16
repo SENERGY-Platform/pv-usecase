@@ -90,10 +90,12 @@ class Operator(util.OperatorBase):
         if len(self.replay_buffer)==self.buffer_len:
             random.shuffle(self.replay_buffer)
             for agent in self.replay_buffer:
-                action, log_prob, other_action, log_prob_other_action = agent.act(self.policy)
+                action, log_prob = agent.act(self.policy)
                 reward = agent.get_reward(action, [power for _, power in self.daylight_power_history])
+                agent.learn(reward, log_prob, self.optimizer)
+                other_action, log_prob_other_action = agent.act_differently(self.policy)
                 other_reward = agent.get_reward(other_action, [power for _, power in self.daylight_power_history])
-                agent.learn([(reward, log_prob),(other_reward, log_prob_other_action)], self.optimizer)
+                agent.learn(other_reward, log_prob_other_action, self.optimizer)
 
         torch.save(self.policy.state_dict(), self.model_file)
         with open(self.weather_file, 'wb') as f:
@@ -140,7 +142,7 @@ class Operator(util.OperatorBase):
             if len(self.replay_buffer)==self.buffer_len and old_agent.power_list != []:
                 old_agent.action, old_agent.log_prob = old_agent.act(self.policy)
                 old_agent.reward = old_agent.get_reward(old_agent.action, [power for _, power in self.daylight_power_history])
-                old_agent.learn([(old_agent.reward, old_agent.log_prob)], self.optimizer)
+                old_agent.learn(old_agent.reward, old_agent.log_prob, self.optimizer)
                 self.agents_data.append(old_agent)
                 self.power_lists.append(old_agent.power_list)
                 self.actions.append(old_agent.action)

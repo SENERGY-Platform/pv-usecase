@@ -45,12 +45,20 @@ class Agent:
         m = Categorical(probs)
         action = m.sample()
         log_prob_action = m.log_prob(action)
+        return  action, log_prob_action
+
+    def act_differently(self, policy):
+        state = self.initial_weather_data
+        state = torch.from_numpy(state).float().unsqueeze(0)
+        probs = policy(state).cpu()
+        m = Categorical(probs)
+        action = m.sample()
         if action==torch.tensor(0):
             other_action = action+torch.tensor(1) # ==1
         elif action==torch.tensor(1):
             other_action = action-torch.tensor(1) ## ==0
         log_prob_other_action = m.log_prob(other_action)
-        return  action, log_prob_action, other_action, log_prob_other_action
+        return  other_action, log_prob_other_action
     
     def get_reward(self, action, history):
         agents_power_mean = sum([power_value for _, power_value in self.power_list])/len([power_value for _, power_value in self.power_list])
@@ -63,16 +71,9 @@ class Agent:
             
         return reward
     
-    def learn(self, list_of_reward_log_prob_pairs, optimizer):
-        learn_step_count = 0
-        number_of_different_actions_to_learn_from = len(list_of_reward_log_prob_pairs)
-        for reward, log_prob in list_of_reward_log_prob_pairs:
-            policy_loss = -reward*log_prob
-            optimizer.zero_grad()
-            if learn_step_count==0 and number_of_different_actions_to_learn_from==2:
-                policy_loss.backward(retain_graph=True) # If we want to learn from the second action as well we have to go through the gradient graph a second time!
-            else:
-                policy_loss.backward()
-            optimizer.step()
-            learn_step_count += 1
+    def learn(self, reward, log_prob, optimizer):
+        policy_loss = -reward*log_prob
+        optimizer.zero_grad()
+        policy_loss.backward()
+        optimizer.step()
         
