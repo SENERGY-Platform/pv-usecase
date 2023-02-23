@@ -177,8 +177,7 @@ class Operator(util.OperatorBase):
         return power_forecast
         
     def run(self, data, selector):
-        if os.getenv("DEBUG") is not None and os.getenv("DEBUG").lower() == "true":
-            print(selector + ": " + str(data))
+        print(selector + ": " + str(data))
         if selector == 'weather_func':
             if len(self.weather_same_timestamp)<9:
                 self.weather_same_timestamp.append(data)
