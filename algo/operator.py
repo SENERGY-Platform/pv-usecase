@@ -179,9 +179,9 @@ class Operator(util.OperatorBase):
     def run(self, data, selector):
         print(selector + ": " + str(data))
         if selector == 'weather_func':
-            if len(self.weather_same_timestamp)<9:
+            if len(self.weather_same_timestamp)<47:
                 self.weather_same_timestamp.append(data)
-            elif len(self.weather_same_timestamp)==9:
+            elif len(self.weather_same_timestamp)==47:
                 self.weather_same_timestamp.append(data)
                 new_weather_data = self.weather_same_timestamp
                 _ = self.run_new_weather(new_weather_data[0:3])
