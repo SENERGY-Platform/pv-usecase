@@ -76,7 +76,7 @@ class Operator(util.OperatorBase):
         #    self.policy.load_state_dict(torch.load(self.model_file))
 
     def run_new_weather(self, new_weather_data):
-        new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
+        weather_time, new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
         self.weather_data.append(new_weather_array)
         new_weather_input = np.mean(new_weather_array, axis=0)
 
@@ -86,7 +86,14 @@ class Operator(util.OperatorBase):
             output = torch.argmax(self.policy(input)).item()
         self.policy.train()
 
-        self.agents.append(Agent.Agent())
+        sunrise, sunset = aux_functions.get_sunrise_sunset(self.observer, weather_time)
+        
+        if weather_time < sunset+pd.Timedelta(2,'hours') and weather_time > sunrise-pd.Timedelta(2,'hours'):
+            self.agents.append(Agent.Agent())
+            newest_agent = self.agents[-1]
+            newest_agent.save_weather_data(new_weather_input)
+            newest_agent.initial_time = pd.to_datetime(new_weather_data[0]['weather_time']).tz_localize(None)
+        
         if len(self.replay_buffer)==self.buffer_len:
             random.shuffle(self.replay_buffer)
             for agent in self.replay_buffer:
@@ -101,10 +108,6 @@ class Operator(util.OperatorBase):
         with open(self.weather_file, 'wb') as f:
             pickle.dump(self.weather_data, f)
         
-        newest_agent = self.agents[-1]
-        newest_agent.save_weather_data(new_weather_input)
-        newest_agent.initial_time = pd.to_datetime(new_weather_data[0]['weather_time']).tz_localize(None)
-    
         if output==0:
             return {"value": 0}
         elif output==1:
@@ -116,8 +119,7 @@ class Operator(util.OperatorBase):
             self.power_history.append((time,new_power_value))
             if time-self.power_history[0][0] > self.history_power_len:
                 del self.power_history[0]
-        sunrise = pd.to_datetime(sun.sunrise(self.observer, date=time, tzinfo='UTC')).tz_localize(None)
-        sunset = pd.to_datetime(sun.sunset(self.observer, date=time, tzinfo='UTC')).tz_localize(None)
+        sunrise, sunset = aux_functions.get_sunrise_sunset(self.observer, time)
         if (sunrise+pd.Timedelta(self.power_history_start_stop, 'hours')<time) and (time+pd.Timedelta(self.power_history_start_stop, 'hours')<sunset):
             if new_power_value != None:
                self.daylight_power_history.append((time,new_power_value))
@@ -162,7 +164,7 @@ class Operator(util.OperatorBase):
     def create_power_forecast(self, new_weather_data):
         self.policy.eval() 
         power_forecast = []
-        new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
+        _, new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
         new_weather_forecasted_for = [pd.to_datetime(datapoint['forecasted_for']).tz_localize(None) for datapoint in new_weather_data]
         for i in range(0,len(new_weather_array),3):
             new_weather_input = np.mean(new_weather_array[i:i+3], axis=0)

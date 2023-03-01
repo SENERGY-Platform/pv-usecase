@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from astral import sun
 
 def preprocess_power_data(new_power_data):
     time=pd.to_datetime(new_power_data['energy_time']).tz_localize(None)
@@ -18,4 +19,9 @@ def preprocess_weather_data(new_weather_data):
 
     weather_array = np.array(aux_list)
 
-    return weather_array
+    return pd.to_datetime(new_weather_data[0]['weather_time']).tz_localize(None), weather_array
+
+def get_sunrise_sunset(observer, time):
+    sunrise = pd.to_datetime(sun.sunrise(observer, date=time, tzinfo='UTC')).tz_localize(None)
+    sunset = pd.to_datetime(sun.sunset(observer, date=time, tzinfo='UTC')).tz_localize(None)
+    return sunrise, sunset
