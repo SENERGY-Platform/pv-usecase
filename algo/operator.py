@@ -41,7 +41,7 @@ class Operator(util.OperatorBase):
         self.long = float(long)
         self.observer = astral.Observer(latitude=self.lat, longitude=self.long)
 
-        tf = TimezoneFinder
+        tf = TimezoneFinder()
         self.timezone=tf.certain_timezone_at(lng=self.long, lat=self.lat)
 
         self.weather_same_timestamp = []
