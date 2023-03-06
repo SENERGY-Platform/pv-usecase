@@ -147,7 +147,7 @@ class Operator(util.OperatorBase):
                 self.actions.append(old_agent.action)
                 self.rewards.append(old_agent.reward)
             if old_agent.power_list != []:
-                self.replay_buffer.append(old_agent)
+                aux_functions.update_replay_buffer(self.replay_buffer, old_agent, [power for _, power in self.daylight_power_history])
 
         with open(self.power_lists_file, 'wb') as f:
             pickle.dump(self.power_lists, f)

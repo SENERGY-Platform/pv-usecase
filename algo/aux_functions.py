@@ -25,3 +25,25 @@ def get_sunrise_sunset(observer, time):
     sunrise = pd.to_datetime(sun.sunrise(observer, date=time, tzinfo='UTC')).tz_localize(None)
     sunset = pd.to_datetime(sun.sunset(observer, date=time, tzinfo='UTC')).tz_localize(None)
     return sunrise, sunset
+
+def update_replay_buffer(replay_buffer, agent, history):
+    high_power_counter = 0
+    history_mean = sum(history)/len(history)
+
+    for old_agent in replay_buffer:
+        old_agents_power_mean = sum([power_value for _, power_value in old_agent.power_list])/len([power_value for _, power_value in old_agent.power_list])
+        if old_agents_power_mean >= history_mean:
+            high_power_counter += 1
+
+    low_power_counter = len(replay_buffer) - high_power_counter
+
+    agents_power_mean = sum([power_value for _, power_value in agent.power_list])/len([power_value for _, power_value in agent.power_list])
+    if agents_power_mean-history_mean >= 0:
+        agents_type = 'high'
+    elif agents_power_mean-history_mean < 0:
+        agents_type = 'low'
+
+    if high_power_counter <= low_power_counter and agents_type == 'high':
+        replay_buffer.append(agent)
+    elif high_power_counter > low_power_counter and agents_type == 'low':
+        replay_buffer.append(agent)
