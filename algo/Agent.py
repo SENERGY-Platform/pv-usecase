@@ -47,19 +47,6 @@ class Agent:
         log_prob_action = m.log_prob(action)
         return  action, log_prob_action
 
-    def act_differently(self, policy):
-        state = self.initial_weather_data
-        state = torch.from_numpy(state).float().unsqueeze(0)
-        probs = policy(state).cpu()
-        m = Categorical(probs)
-        action = m.sample()
-        if action==torch.tensor(0):
-            other_action = action+torch.tensor(1) # ==1
-        elif action==torch.tensor(1):
-            other_action = action-torch.tensor(1) ## ==0
-        log_prob_other_action = m.log_prob(other_action)
-        return  other_action, log_prob_other_action
-    
     def get_reward(self, action, history):
         agents_power_mean = sum([power_value for _, power_value in self.power_list])/len([power_value for _, power_value in self.power_list])
         history_mean = sum(history)/len(history)

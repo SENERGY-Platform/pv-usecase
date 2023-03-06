@@ -100,9 +100,6 @@ class Operator(util.OperatorBase):
                 action, log_prob = agent.act(self.policy)
                 reward = agent.get_reward(action, [power for _, power in self.daylight_power_history])
                 agent.learn(reward, log_prob, self.optimizer)
-                other_action, log_prob_other_action = agent.act_differently(self.policy)
-                other_reward = agent.get_reward(other_action, [power for _, power in self.daylight_power_history])
-                agent.learn(other_reward, log_prob_other_action, self.optimizer)
 
         torch.save(self.policy.state_dict(), self.model_file)
         with open(self.weather_file, 'wb') as f:
