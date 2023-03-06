@@ -29,6 +29,7 @@ import random
 import astral
 from astral import sun
 import matplotlib.pyplot as plt
+from timezonefinder import TimezoneFinder
 
 
 class Operator(util.OperatorBase):
@@ -39,6 +40,9 @@ class Operator(util.OperatorBase):
         self.lat = float(lat)
         self.long = float(long)
         self.observer = astral.Observer(latitude=self.lat, longitude=self.long)
+
+        tf = TimezoneFinder
+        self.timezone=tf.certain_timezone_at(lng=self.long, lat=self.lat)
 
         self.weather_same_timestamp = []
 
@@ -92,7 +96,7 @@ class Operator(util.OperatorBase):
             self.agents.append(Agent.Agent())
             newest_agent = self.agents[-1]
             newest_agent.save_weather_data(new_weather_input)
-            newest_agent.initial_time = pd.to_datetime(new_weather_data[0]['weather_time']).tz_localize(None)
+            newest_agent.initial_time = pd.to_datetime(new_weather_data[0]['weather_time'])
         
         if len(self.replay_buffer)==self.buffer_len:
             random.shuffle(self.replay_buffer)
@@ -111,7 +115,7 @@ class Operator(util.OperatorBase):
             return {"value": 1}
 
     def run_new_power(self, new_power_data):
-        time, new_power_value = aux_functions.preprocess_power_data(new_power_data)
+        time, new_power_value = aux_functions.preprocess_power_data(new_power_data,self.timezone)
         if new_power_value != None:
             self.power_history.append((time,new_power_value))
             if time-self.power_history[0][0] > self.history_power_len:
@@ -162,7 +166,7 @@ class Operator(util.OperatorBase):
         self.policy.eval() 
         power_forecast = []
         _, new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
-        new_weather_forecasted_for = [pd.to_datetime(datapoint['forecasted_for']).tz_localize(None) for datapoint in new_weather_data]
+        new_weather_forecasted_for = [pd.to_datetime(datapoint['forecasted_for']) for datapoint in new_weather_data]
         for i in range(0,len(new_weather_array),3):
             new_weather_input = np.mean(new_weather_array[i:i+3], axis=0)
             with torch.no_grad():

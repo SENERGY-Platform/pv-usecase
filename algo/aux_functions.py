@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 from astral import sun
 
-def preprocess_power_data(new_power_data):
-    time=pd.to_datetime(new_power_data['energy_time']).tz_localize(None)
+def preprocess_power_data(new_power_data, timezone):
+    time=pd.to_datetime(new_power_data['energy_time'])
+    if time.tzinfo == None:
+        time = time.tz_localize(timezone)
     power = new_power_data['energy']
     return time, power
 
@@ -13,17 +15,17 @@ def preprocess_weather_data(new_weather_data):
     # Normalization of time (min=0, max=24), relative humidity (min=0, max=100), uv-index (min=0, max~10), cloud area fraction
     # (min=0, max=100) is easy. For temperature we choose min=-10, max=30 and for precipitation amount: min=0, max=10.
 
-    aux_list = [[pd.to_datetime(data_point['weather_time']).tz_localize(None).hour/24, (data_point['instant_air_temperature']+10)/40, data_point['instant_relative_humidity']/100,
+    aux_list = [[pd.to_datetime(data_point['weather_time']).hour/24, (data_point['instant_air_temperature']+10)/40, data_point['instant_relative_humidity']/100,
                  data_point['instant_ultraviolet_index_clear_sky']/10, data_point['1_hours_precipitation_amount']/10,
                  data_point['instant_cloud_area_fraction']/100] for data_point in new_weather_data]
 
     weather_array = np.array(aux_list)
 
-    return pd.to_datetime(new_weather_data[0]['weather_time']).tz_localize(None), weather_array
+    return pd.to_datetime(new_weather_data[0]['weather_time']), weather_array
 
 def get_sunrise_sunset(observer, time):
-    sunrise = pd.to_datetime(sun.sunrise(observer, date=time, tzinfo='UTC')).tz_localize(None)
-    sunset = pd.to_datetime(sun.sunset(observer, date=time, tzinfo='UTC')).tz_localize(None)
+    sunrise = pd.to_datetime(sun.sunrise(observer, date=time))
+    sunset = pd.to_datetime(sun.sunset(observer, date=time))
     return sunrise, sunset
 
 def update_replay_buffer(replay_buffer, agent, history):
