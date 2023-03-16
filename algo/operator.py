@@ -92,7 +92,7 @@ class Operator(util.OperatorBase):
 
         sunrise, sunset = aux_functions.get_sunrise_sunset(self.observer, weather_time)
         
-        if weather_time < sunset+pd.Timedelta(2,'hours') and weather_time > sunrise-pd.Timedelta(2,'hours'):
+        if weather_time < sunset+pd.Timedelta(3,'hours') and weather_time > sunrise-pd.Timedelta(3,'hours'):
             self.agents.append(Agent.Agent())
             newest_agent = self.agents[-1]
             newest_agent.save_weather_data(new_weather_input)
