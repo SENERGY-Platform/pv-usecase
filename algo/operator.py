@@ -33,7 +33,7 @@ from timezonefinder import TimezoneFinder
 
 
 class Operator(util.OperatorBase):
-    def __init__(self, lat, long, power_history_start_stop='2', buffer_len='48', weather_dim=6, data_path="data"):
+    def __init__(self, lat, long, power_history_start_stop='1', buffer_len='48', weather_dim=7, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
         
@@ -55,7 +55,7 @@ class Operator(util.OperatorBase):
         self.daylight_power_history = []
 
         self.agents = []
-        self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
+        self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=7, since the time gets projected onto the circle.
         self.optimizer = optim.Adam(self.policy.parameters(), lr=1e-2)
 
         self.power_lists = []
