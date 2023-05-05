@@ -64,20 +64,19 @@ class Operator(util.OperatorBase):
         self.weather_data = []
         self.agents_data = []
 
-        self.power_lists_file = f'{data_path}/power_lists_{self.power_history_start_stop}.pickle'
-        self.actions_file = f'{data_path}/actions_{self.power_history_start_stop}.pickle'
-        self.rewards_file = f'{data_path}/rewards_{self.power_history_start_stop}.pickle'
         self.weather_file = f'{data_path}/weather_{self.power_history_start_stop}.pickle'
         self.agents_data_file = f'{data_path}/agents_data_{self.power_history_start_stop}.pickle'
 
         self.model_file = f'{data_path}/model_{self.power_history_start_stop}.pt'
+        self.replay_buffer_file = f'{data_path}/replay_buffer_{self.power_history_start_stop}.pt'
 
         self.power_forecast_plot_file = f'{data_path}/histogram_{self.power_history_start_stop}.png'
 
         torch.autograd.set_detect_anomaly(True)
 
-        #if os.path.exists(self.model_file):
-        #    self.policy.load_state_dict(torch.load(self.model_file))
+        if os.path.exists(self.replay_buffer_file):
+            with open(self.replay_buffer_file, 'rb') as f:
+                self.replay_buffer = pickle.load(f)
 
     def run_new_weather(self, new_weather_data):
         weather_time, new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
@@ -153,14 +152,10 @@ class Operator(util.OperatorBase):
             if old_agent.power_list != [] and self.daylight_power_history != []:
                 aux_functions.update_replay_buffer(self.replay_buffer, old_agent, [power for _, power in self.daylight_power_history])
 
-        with open(self.power_lists_file, 'wb') as f:
-            pickle.dump(self.power_lists, f)
-        with open(self.actions_file, 'wb') as f:
-            pickle.dump(self.actions, f)
-        with open(self.rewards_file, 'wb') as f:
-            pickle.dump(self.rewards, f)
         with open(self.agents_data_file, 'wb') as f:
             pickle.dump(self.agents_data, f)
+        with open(self.replay_buffer_file, 'wb') as f:
+            pickle.dump(self.replay_buffer, f)
 
     def create_power_forecast(self, new_weather_data):
         self.policy.eval() 
