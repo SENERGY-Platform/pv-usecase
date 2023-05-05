@@ -68,7 +68,7 @@ class Operator(util.OperatorBase):
         self.agents_data_file = f'{data_path}/agents_data_{self.power_history_start_stop}.pickle'
 
         self.model_file = f'{data_path}/model_{self.power_history_start_stop}.pt'
-        self.replay_buffer_file = f'{data_path}/replay_buffer_{self.power_history_start_stop}.pt'
+        self.replay_buffer_file = f'{data_path}/replay_buffer_{self.power_history_start_stop}.pickle'
 
         self.power_forecast_plot_file = f'{data_path}/histogram_{self.power_history_start_stop}.png'
 
