@@ -99,9 +99,10 @@ class Operator(util.OperatorBase):
         
         if len(self.replay_buffer)==self.buffer_len:
             random.shuffle(self.replay_buffer)
+            replay_buffer_power_history = [sum([power_value for _, power_value in agent.power_list])/len([power_value for _, power_value in agent.power_list]) for agent in self.replay_buffer]
             for agent in self.replay_buffer:
                 action, log_prob = agent.act(self.policy)
-                reward = agent.get_reward(action, [power for _, power in self.daylight_power_history])
+                reward = agent.get_reward(action, replay_buffer_power_history)
                 agent.learn(reward, log_prob, self.optimizer)
 
         torch.save(self.policy.state_dict(), self.model_file)
