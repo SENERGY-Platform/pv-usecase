@@ -78,6 +78,9 @@ class Operator(util.OperatorBase):
             with open(self.replay_buffer_file, 'rb') as f:
                 self.replay_buffer = pickle.load(f)
 
+        if os.path.exists(self.model_file):
+            self.policy.load_state_dict(torch.load(self.model_file))
+
     def run_new_weather(self, new_weather_data):
         weather_time, new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
         self.weather_data.append(new_weather_array)
