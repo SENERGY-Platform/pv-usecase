@@ -69,6 +69,7 @@ class Operator(util.OperatorBase):
 
         self.model_file = f'{data_path}/model_{self.power_history_start_stop}.pt'
         self.replay_buffer_file = f'{data_path}/replay_buffer_{self.power_history_start_stop}.pickle'
+        self.daylight_power_history_file = f'{data_path}/daylight_power_history_{self.power_history_start_stop}.pickle'
 
         self.power_forecast_plot_file = f'{data_path}/histogram_{self.power_history_start_stop}.png'
 
@@ -77,6 +78,10 @@ class Operator(util.OperatorBase):
         if os.path.exists(self.replay_buffer_file):
             with open(self.replay_buffer_file, 'rb') as f:
                 self.replay_buffer = pickle.load(f)
+
+        if os.path.exists(self.daylight_power_history_file):
+            with open(self.daylight_power_history_file, 'rb') as f:
+                self.daylight_power_history = pickle.load(f)
 
         if os.path.exists(self.model_file):
             self.policy.load_state_dict(torch.load(self.model_file))
@@ -102,10 +107,9 @@ class Operator(util.OperatorBase):
         
         if len(self.replay_buffer)==self.buffer_len:
             random.shuffle(self.replay_buffer)
-            replay_buffer_power_history = [sum([power_value for _, power_value in agent.power_list])/len([power_value for _, power_value in agent.power_list]) for agent in self.replay_buffer]
             for agent in self.replay_buffer:
                 action, log_prob = agent.act(self.policy)
-                reward = agent.get_reward(action, replay_buffer_power_history)
+                reward = agent.get_reward(action, [power for _, power in self.daylight_power_history])
                 agent.learn(reward, log_prob, self.optimizer)
 
         torch.save(self.policy.state_dict(), self.model_file)
@@ -129,6 +133,8 @@ class Operator(util.OperatorBase):
                self.daylight_power_history.append((time,new_power_value))
                if time-self.daylight_power_history[0][0] > self.history_power_len:
                    del self.daylight_power_history[0]
+        with open(self.daylight_power_history_file, 'wb') as f:
+            pickle.dump(self.daylight_power_history, f)
 
         old_agents = []
         old_indices = []
