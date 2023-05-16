@@ -53,6 +53,7 @@ class Operator(util.OperatorBase):
         self.replay_buffer = deque(maxlen=self.buffer_len)
         self.power_history = []
         self.daylight_power_history = []
+        self.num_learned_from_buffer = 0
 
         self.agents = []
         self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of temp, humidity, uv-index, precipitation and clouds we have weather_dim=5
@@ -70,6 +71,7 @@ class Operator(util.OperatorBase):
 
         self.model_file = f'{data_path}/model_{self.power_history_start_stop}.pt'
         self.replay_buffer_file = f'{data_path}/replay_buffer_{self.power_history_start_stop}.png'
+        self.daylight_power_history_file = f'{data_path}/daylight_power_history_{self.power_history_start_stop}.png'
 
         self.power_forecast_plot_file = f'{data_path}/histogram_{self.power_history_start_stop}.png'
 
@@ -78,6 +80,13 @@ class Operator(util.OperatorBase):
         if os.path.exists(self.replay_buffer_file):
             with open(self.replay_buffer_file, 'rb') as f:
                 self.replay_buffer = pickle.load(f)
+
+        if os.path.exists(self.daylight_power_history_file):
+            with open(self.daylight_power_history_file, 'rb') as f:
+                self.daylight_power_history = pickle.load(f)
+
+        if os.path.exists(self.model_file):
+            self.policy.load_state_dict(torch.load(self.model_file))
 
     def run_new_weather(self, new_weather_data):
         weather_time, new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
@@ -98,12 +107,13 @@ class Operator(util.OperatorBase):
             newest_agent.save_weather_data(new_weather_input)
             newest_agent.initial_time = pd.to_datetime(new_weather_data[0]['weather_time'])
         
-        if len(self.replay_buffer)==self.buffer_len:
+        if len(self.replay_buffer)==self.buffer_len and self.num_learned_from_buffer <= 3:
             random.shuffle(self.replay_buffer)
             for agent in self.replay_buffer:
                 action, log_prob = agent.act(self.policy)
                 reward = agent.get_reward(action, [power for _, power in self.daylight_power_history])
                 agent.learn(reward, log_prob, self.optimizer)
+            self.num_learned_from_buffer += 1
 
         torch.save(self.policy.state_dict(), self.model_file)
         with open(self.weather_file, 'wb') as f:
@@ -126,6 +136,8 @@ class Operator(util.OperatorBase):
                self.daylight_power_history.append((time,new_power_value))
                if time-self.daylight_power_history[0][0] > self.history_power_len:
                    del self.daylight_power_history[0]
+        with open(self.daylight_power_history_file, 'wb') as f:
+            pickle.dump(self.daylight_power_history, f)
 
         old_agents = []
         old_indices = []
