@@ -45,7 +45,7 @@ def update_replay_buffer(replay_buffer, agent, history):
     elif agents_power_mean-history_mean < 0:
         agents_type = 'low'
 
-    if high_power_counter <= low_power_counter and agents_type == 'high':
+    if high_power_counter <= low_power_counter+5 and agents_type == 'high':
         replay_buffer.append(agent)
-    elif high_power_counter > low_power_counter and agents_type == 'low':
+    elif high_power_counter+5 > low_power_counter and agents_type == 'low':
         replay_buffer.append(agent)
