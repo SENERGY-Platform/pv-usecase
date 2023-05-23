@@ -72,6 +72,7 @@ class Operator(util.OperatorBase):
         self.model_file = f'{data_path}/model_{self.power_history_start_stop}.pt'
         self.replay_buffer_file = f'{data_path}/replay_buffer_{self.power_history_start_stop}.png'
         self.daylight_power_history_file = f'{data_path}/daylight_power_history_{self.power_history_start_stop}.png'
+        self.num_learned_from_buffer_file = f'{data_path}/num_learned_from_buffer_{self.power_history_start_stop}.png'
 
         self.power_forecast_plot_file = f'{data_path}/histogram_{self.power_history_start_stop}.png'
 
@@ -87,6 +88,10 @@ class Operator(util.OperatorBase):
 
         if os.path.exists(self.model_file):
             self.policy.load_state_dict(torch.load(self.model_file))
+
+        if os.path.exists(self.num_learned_from_buffer_file):
+            with open(self.num_learned_from_buffer_file, 'rb') as f:
+                self.num_learned_from_buffer = pickle.load(f)
 
     def run_new_weather(self, new_weather_data):
         weather_time, new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
@@ -114,6 +119,8 @@ class Operator(util.OperatorBase):
                 reward = agent.get_reward(action, [power for _, power in self.daylight_power_history])
                 agent.learn(reward, log_prob, self.optimizer)
             self.num_learned_from_buffer += 1
+            with open(self.num_learned_from_buffer_file, 'wb') as f:
+                pickle.dump(self.num_learned_from_buffer, f)
 
         torch.save(self.policy.state_dict(), self.model_file)
         with open(self.weather_file, 'wb') as f:
