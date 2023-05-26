@@ -89,10 +89,6 @@ class Operator(util.OperatorBase):
             if os.path.getsize(self.model_file) > 0:
                 self.policy.load_state_dict(torch.load(self.model_file))
 
-        if os.path.exists(self.num_learned_from_buffer_file):
-            with open(self.num_learned_from_buffer_file, 'rb') as f:
-                if os.path.getsize(self.num_learned_from_buffer_file) > 0:
-                    self.num_learned_from_buffer = pickle.load(f)
 
     def run_new_weather(self, new_weather_data):
         weather_time, new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
