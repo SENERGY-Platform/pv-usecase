@@ -32,7 +32,7 @@ class Selector(simple_struct.Structure):
 
 class Config(simple_struct.Structure):
     logger_level = "warning"
-    weather_dim = 7
+    weather_dim = 6
     data_path = "/opt/data"
     selectors: typing.List[Selector] = None
     buffer_len: str = None
