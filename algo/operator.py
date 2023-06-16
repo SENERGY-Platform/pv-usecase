@@ -73,8 +73,6 @@ class Operator(util.OperatorBase):
 
         self.power_forecast_plot_file = f'{data_path}/histogram_{self.power_history_start_stop}.png'
 
-        torch.autograd.set_detect_anomaly(True)
-
         if os.path.exists(self.replay_buffer_file):
             with open(self.replay_buffer_file, 'rb') as f:
                 if os.path.getsize(self.replay_buffer_file) > 0:
