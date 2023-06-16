@@ -59,10 +59,6 @@ class Operator(util.OperatorBase):
         self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6
         self.optimizer = optim.Adam(self.policy.parameters(), lr=1e-2)
 
-        self.power_lists = []
-        self.actions = []
-        self.rewards = []
-        self.weather_data = []
         self.agents_data = []
 
         
@@ -102,7 +98,6 @@ class Operator(util.OperatorBase):
 
     def run_new_weather(self, new_weather_data):
         weather_time, new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
-        self.weather_data.append(new_weather_array)
         new_weather_input = np.mean(new_weather_array, axis=0)
 
         self.policy.eval()      # The current policy is used for prediction.
@@ -130,8 +125,6 @@ class Operator(util.OperatorBase):
                 pickle.dump(self.num_learned_from_buffer, f)
 
         torch.save(self.policy.state_dict(), self.model_file)
-        with open(self.weather_file, 'wb') as f:
-            pickle.dump(self.weather_data, f)
         
         if output==0:
             return {"value": 0}
@@ -173,9 +166,6 @@ class Operator(util.OperatorBase):
                 old_agent.reward = old_agent.get_reward(old_agent.action, [power for _, power in self.daylight_power_history])
                 old_agent.learn(old_agent.reward, old_agent.log_prob, self.optimizer)
                 self.agents_data.append(old_agent)
-                self.power_lists.append(old_agent.power_list)
-                self.actions.append(old_agent.action)
-                self.rewards.append(old_agent.reward)
             if old_agent.power_list != [] and self.daylight_power_history != []:
                 aux_functions.update_replay_buffer(self.replay_buffer, old_agent, [power for _, power in self.daylight_power_history])
 
