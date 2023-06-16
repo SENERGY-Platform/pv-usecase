@@ -58,7 +58,6 @@ class Operator(util.OperatorBase):
         self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
         self.optimizer = optim.Adam(self.policy.parameters(), lr=1e-2)
 
-        self.power_lists = []
         self.actions = []
         self.rewards = []
         self.weather_data = []
@@ -158,7 +157,6 @@ class Operator(util.OperatorBase):
                 old_agent.reward = old_agent.get_reward(old_agent.action, [power for _, power in self.daylight_power_history])
                 old_agent.learn(old_agent.reward, old_agent.log_prob, self.optimizer)
                 self.agents_data.append(old_agent)
-                self.power_lists.append(old_agent.power_list)
                 self.actions.append(old_agent.action)
                 self.rewards.append(old_agent.reward)
             if old_agent.power_list != [] and self.daylight_power_history != []:
