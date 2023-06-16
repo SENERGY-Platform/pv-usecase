@@ -58,7 +58,6 @@ class Operator(util.OperatorBase):
         self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
         self.optimizer = optim.Adam(self.policy.parameters(), lr=1e-2)
 
-        self.weather_data = []
         self.agents_data = []
 
         self.weather_file = f'{data_path}/weather_{self.power_history_start_stop}.pickle'
@@ -87,7 +86,6 @@ class Operator(util.OperatorBase):
 
     def run_new_weather(self, new_weather_data):
         weather_time, new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
-        self.weather_data.append(new_weather_array)
         new_weather_input = np.mean(new_weather_array, axis=0)
 
         self.policy.eval()      # The current policy is used for prediction.
@@ -112,8 +110,6 @@ class Operator(util.OperatorBase):
                 agent.learn(reward, log_prob, self.optimizer)
 
         torch.save(self.policy.state_dict(), self.model_file)
-        with open(self.weather_file, 'wb') as f:
-            pickle.dump(self.weather_data, f)
         
         if output==0:
             return {"value": 0}
