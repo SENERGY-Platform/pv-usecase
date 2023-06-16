@@ -82,6 +82,11 @@ class Operator(util.OperatorBase):
                 if os.path.getsize(self.daylight_power_history_file) > 0:
                     self.daylight_power_history = pickle.load(f)
 
+        if os.path.exists(self.agents_data_file):
+            with open(self.agents_data_file, 'rb') as f:
+                if os.path.getsize(self.agents_data_file) > 0:
+                    self.agents_data = pickle.load(f)
+
         if os.path.exists(self.model_file):
             if os.path.getsize(self.model_file) > 0:
                 self.policy.load_state_dict(torch.load(self.model_file))
