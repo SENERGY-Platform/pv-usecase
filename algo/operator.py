@@ -58,10 +58,10 @@ class Operator(util.OperatorBase):
         self.policy = Agent.Policy(state_size=weather_dim) # If we keep track of time, temp, humidity, uv-index, precipitation and clouds we have weather_dim=6.
         self.optimizer = optim.Adam(self.policy.parameters(), lr=1e-2)
 
-        self.agents_data = []
+    
 
-        self.weather_file = f'{data_path}/weather_{self.power_history_start_stop}.pickle'
-        self.agents_data_file = f'{data_path}/agents_data_{self.power_history_start_stop}.pickle'
+        
+    
 
         self.model_file = f'{data_path}/model_{self.power_history_start_stop}.pt'
         self.replay_buffer_file = f'{data_path}/replay_buffer_{self.power_history_start_stop}.pickle'
@@ -78,11 +78,6 @@ class Operator(util.OperatorBase):
             with open(self.daylight_power_history_file, 'rb') as f:
                 if os.path.getsize(self.daylight_power_history_file) > 0:
                     self.daylight_power_history = pickle.load(f)
-
-        if os.path.exists(self.agents_data_file):
-            with open(self.agents_data_file, 'rb') as f:
-                if os.path.getsize(self.agents_data_file) > 0:
-                    self.agents_data = pickle.load(f)
 
         if os.path.exists(self.model_file):
             if os.path.getsize(self.model_file) > 0:
@@ -155,12 +150,9 @@ class Operator(util.OperatorBase):
                 old_agent.action, old_agent.log_prob = old_agent.act(self.policy)
                 old_agent.reward = old_agent.get_reward(old_agent.action, [power for _, power in self.daylight_power_history])
                 old_agent.learn(old_agent.reward, old_agent.log_prob, self.optimizer)
-                self.agents_data.append(old_agent)
             if old_agent.power_list != [] and self.daylight_power_history != []:
                 aux_functions.update_replay_buffer(self.replay_buffer, old_agent, [power for _, power in self.daylight_power_history])
 
-        with open(self.agents_data_file, 'wb') as f:
-            pickle.dump(self.agents_data, f)
         with open(self.replay_buffer_file, 'wb') as f:
             pickle.dump(self.replay_buffer, f)
 
