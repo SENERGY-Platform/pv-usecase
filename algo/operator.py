@@ -36,6 +36,8 @@ class Operator(util.OperatorBase):
     def __init__(self, lat, long, power_history_start_stop='2', buffer_len='48', weather_dim=6, data_path="data"):
         if not os.path.exists(data_path):
             os.mkdir(data_path)
+
+        self.data_path = data_path
         
         self.lat = float(lat)
         self.long = float(long)
@@ -139,6 +141,9 @@ class Operator(util.OperatorBase):
                 if new_power_value != None:
                     agent.update_power_list(time, new_power_value)
             elif agent.initial_time + pd.Timedelta(2,'hours') < time:
+                agents_initial_time_string = agent.initial_time.strftime('%Y-%m-%d %X')
+                with open(f'{self.data_path}/agent_{agents_initial_time_string}_{self.power_history_start_stop}.pickle') as f:
+                    pickle.dump(agent, f)
                 old_agents.append(agent)
                 old_indices.append(i)
 
