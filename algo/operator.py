@@ -146,7 +146,7 @@ class Operator(util.OperatorBase):
                     agent.update_power_list(time, new_power_value)
             elif agent.initial_time + pd.Timedelta(2,'hours') < time:
                 agents_initial_time_string = agent.initial_time.strftime('%Y-%m-%d %X')
-                with open(f'{self.data_path}/agent_{agents_initial_time_string}_{self.power_history_start_stop}.pickle') as f:
+                with open(f'{self.data_path}/agent_{agents_initial_time_string}_{self.power_history_start_stop}.pickle', 'rb') as f:
                     pickle.dump(agent, f)
                 old_agents.append(agent)
                 old_indices.append(i)
