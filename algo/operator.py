@@ -87,9 +87,7 @@ class Operator(util.OperatorBase):
                 if os.path.getsize(self.num_learned_from_buffer_file) > 0:
                     self.num_learned_from_buffer = pickle.load(f)
 
-    fp = open("/opt/data/memory_profile_logs.log","w+")
-
-    @profile(stream=fp)
+    @profile(stream=open("/opt/data/memory_profile_logs.log","w+"))
     def run_new_weather(self, new_weather_data):
         weather_time, new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
         new_weather_input = np.mean(new_weather_array, axis=0)
