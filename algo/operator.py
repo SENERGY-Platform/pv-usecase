@@ -30,7 +30,7 @@ import astral
 from astral import sun
 import matplotlib.pyplot as plt
 from timezonefinder import TimezoneFinder
-
+from memory_profiler import profile
 
 class Operator(util.OperatorBase):
     def __init__(self, lat, long, power_history_start_stop='1', buffer_len='48', weather_dim=7, data_path="data"):
@@ -87,6 +87,7 @@ class Operator(util.OperatorBase):
                 if os.path.getsize(self.num_learned_from_buffer_file) > 0:
                     self.num_learned_from_buffer = pickle.load(f)
 
+    @profile
     def run_new_weather(self, new_weather_data):
         weather_time, new_weather_array = aux_functions.preprocess_weather_data(new_weather_data)
         new_weather_input = np.mean(new_weather_array, axis=0)
