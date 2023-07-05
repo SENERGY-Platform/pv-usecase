@@ -28,7 +28,6 @@ import os
 import random
 import astral
 from astral import sun
-import matplotlib.pyplot as plt
 from timezonefinder import TimezoneFinder
 
 class Operator(util.OperatorBase):
@@ -64,8 +63,6 @@ class Operator(util.OperatorBase):
         self.replay_buffer_file = f'{data_path}/replay_buffer_{self.power_history_start_stop}.png'
         self.daylight_power_history_file = f'{data_path}/daylight_power_history_{self.power_history_start_stop}.png'
         self.num_learned_from_buffer_file = f'{data_path}/num_learned_from_buffer_{self.power_history_start_stop}.png'
-
-        self.power_forecast_plot_file = f'{data_path}/histogram_{self.power_history_start_stop}.png'
 
         if os.path.exists(self.replay_buffer_file):
             with open(self.replay_buffer_file, 'rb') as f:
@@ -175,9 +172,6 @@ class Operator(util.OperatorBase):
                 input = torch.from_numpy(new_weather_input).float().unsqueeze(0)
                 probability = float(self.policy(input).squeeze()[1])
             power_forecast.append((new_weather_forecasted_for[i],probability))
-        fig, ax = plt.subplots(1,1,figsize=(30,30))
-        ax.plot([timestamp for timestamp,_ in power_forecast],[probability for _,probability in power_forecast])
-        plt.savefig(self.power_forecast_plot_file)
         self.policy.train()
         return power_forecast
         
